@@ -204,11 +204,27 @@ def get_args():
             "autoquant",
             "sparsify",
         ],
+        help="Inference or Quantization type."
     )
-    parser.add_argument("--device", type=str, default="cuda")
-    parser.add_argument("--quantize_vae", action="store_true", default=False)
-    parser.add_argument("--compile", action="store_true", default=False)
-    parser.add_argument("--fuse_qkv", action="store_true", default=False)
+    parser.add_argument("--device", type=str, default="cuda", help="Device to run inference on.")
+    parser.add_argument(
+        "--quantize_vae",
+        action="store_true",
+        default=False,
+        help="Whether or not to quantize the CogVideoX VAE. Can lead to worse decoding results in some quantization cases."
+    )
+    parser.add_argument(
+        "--compile",
+        action="store_true",
+        default=False,
+        help="Whether or not to torch.compile the models. For our experiments with CogVideoX, we only compile the transformer."
+    )
+    parser.add_argument(
+        "--fuse_qkv",
+        action="store_true",
+        default=False,
+        help="Whether or not to fuse the QKV projection layers into one larger layer."
+    )
     return parser.parse_args()
 
 

@@ -173,10 +173,19 @@ def serialize_artifacts(info: dict, pipeline, args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ckpt_id", default="PixArt-alpha/PixArt-Sigma-XL-2-1024-MS", type=str)
-    parser.add_argument("--fuse_attn_projections", action="store_true")
-    parser.add_argument("--compile", action="store_true")
-    parser.add_argument("--compile_vae", action="store_true")
+    parser.add_argument(
+        "--ckpt_id",
+        default="PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
+        type=str,
+        help="Hub model or path to local model for which the benchmark is to be run."
+    )
+    parser.add_argument(
+        "--fuse_attn_projections",
+        action="store_true",
+        help="Whether or not to fuse the QKV projection layers into one larger layer.",
+    )
+    parser.add_argument("--compile", action="store_true", help="Whether or not to torch.compile the models.")
+    parser.add_argument("--compile_vae", action="store_true", help="If compiling, should VAE be compiled too?")
     parser.add_argument(
         "--quantization",
         default="None",
@@ -184,7 +193,13 @@ if __name__ == "__main__":
         help="Which quantization technique to apply",
     )
     parser.add_argument("--sparsify", action="store_true")
-    parser.add_argument("--batch_size", default=1, type=int, choices=[1, 4, 8])
+    parser.add_argument(
+        "--batch_size",
+        default=1,
+        type=int,
+        choices=[1, 4, 8],
+        help="Number of images to generate for the testing prompt."
+    )
     args = parser.parse_args()
 
     flush()
