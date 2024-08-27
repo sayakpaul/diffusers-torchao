@@ -1,10 +1,11 @@
 import torch
 
+# Set high precision for float32 matrix multiplications. 
+# This setting optimizes performance on NVIDIA GPUs with Ampere architecture (e.g., A100, RTX 30 series) or newer.
 torch.set_float32_matmul_precision("high")
 
 import torch.utils.benchmark as benchmark
 from diffusers import DiffusionPipeline
-import gc
 
 from torchao.quantization import (
     int4_weight_only,
@@ -16,9 +17,10 @@ from torchao.quantization import (
 from torchao.float8.inference import ActivationCasting, QuantConfig, quantize_to_float8
 from torchao.prototype.quant_llm import fp6_llm_weight_only
 from torchao.sparsity import sparsify_, int8_dynamic_activation_int8_semi_sparse_weight
-from tabulate import tabulate
 import argparse
 import json
+
+from utils import pretty_print_results, reset_memory
 
 
 PROMPT = "Eiffel Tower was Made up of more than 2 million translucent straws to look like a cloud, with the bell tower at the top of the building, Michel installed huge foam-making machines in the forest to blow huge amounts of unpredictable wet clouds in the building's classic architecture."
@@ -28,13 +30,6 @@ PREFIXES = {
     "fal/AuraFlow": "auraflow",
     "black-forest-labs/FLUX.1-dev": "flux-dev",
 }
-
-
-def flush():
-    gc.collect()
-    torch.cuda.empty_cache()
-    torch.cuda.reset_max_memory_allocated()
-    torch.cuda.reset_peak_memory_stats()
 
 
 def bytes_to_giga_bytes(bytes):
@@ -122,16 +117,6 @@ def run_inference(pipe, batch_size):
     )
 
 
-def pretty_print_results(results, precision: int = 6):
-    def format_value(value):
-        if isinstance(value, float):
-            return f"{value:.{precision}f}"
-        return value
-
-    filtered_table = {k: format_value(v) for k, v in results.items()}
-    print(tabulate([filtered_table], headers="keys", tablefmt="pipe", stralign="center"))
-
-
 def run_benchmark(pipeline, args):
     for _ in range(5):
         run_inference(pipeline, batch_size=args.batch_size)
@@ -175,7 +160,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--ckpt_id",
-        default="PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
+        default="black-forest-labs/FLUX.1-dev",
         type=str,
         help="Hub model or path to local model for which the benchmark is to be run."
     )
@@ -202,7 +187,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    flush()
+    reset_memory()
 
     pipeline = load_pipeline(
         ckpt_id=args.ckpt_id,

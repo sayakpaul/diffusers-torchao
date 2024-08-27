@@ -1,14 +1,13 @@
 import argparse
-import gc
+import json
 import os
 
-os.environ["TORCH_LOGS"] = "dynamo,output_code,graph_breaks,recompiles"
+os.environ["TORCH_LOGS"] = "+dynamo,output_code,graph_breaks,recompiles"
 
 import torch
 import torch.utils.benchmark as benchmark
 from diffusers import CogVideoXPipeline, CogVideoXDDIMScheduler
 from diffusers.utils import export_to_video
-from tabulate import tabulate
 from torchao.quantization import (
     autoquant,
     quantize_,
@@ -22,20 +21,17 @@ from torchao.sparsity import sparsify_
 from torchao.float8.inference import ActivationCasting, QuantConfig, quantize_to_float8
 from torchao.prototype.quant_llm import fp6_llm_weight_only
 
+from utils import pretty_print_results, print_memory, reset_memory
+
+# Set high precision for float32 matrix multiplications. 
+# This setting optimizes performance on NVIDIA GPUs with Ampere architecture (e.g., A100, RTX 30 series) or newer.
 torch.set_float32_matmul_precision("high")
-torch._inductor.config.conv_1x1_as_mm = True
-torch._inductor.config.coordinate_descent_tuning = True
-torch._inductor.config.epilogue_fusion = False
-torch._inductor.config.coordinate_descent_check_all_directions = True
 
 
 CONVERT_DTYPE = {
-    "fp32": lambda module: module.to(dtype=torch.float32),
     "fp16": lambda module: module.to(dtype=torch.float16),
     "bf16": lambda module: module.to(dtype=torch.bfloat16),
     "fp8": lambda module: quantize_to_float8(module, QuantConfig(ActivationCasting.DYNAMIC)),
-    "fp8_e4m3": lambda module: module.to(dtype=torch.float8_e4m3fn),
-    "fp8_e5m2": lambda module: module.to(dtype=torch.float8_e5m2),
     "fp6": lambda module: quantize_(module, fp6_llm_weight_only()),
     "int8wo": lambda module: quantize_(module, int8_weight_only()),
     "int8dq": lambda module: quantize_(module, int8_dynamic_activation_int8_weight()),
@@ -53,32 +49,6 @@ def benchmark_fn(f, *args, **kwargs):
         num_threads=torch.get_num_threads(),
     )
     return f"{(t0.blocked_autorange().mean):.3f}"
-
-
-def reset_memory(device):
-    gc.collect()
-    torch.cuda.empty_cache()
-    torch.cuda.reset_peak_memory_stats(device)
-    torch.cuda.reset_accumulated_memory_stats(device)
-
-
-def print_memory(device):
-    memory = torch.cuda.memory_allocated(device) / 1024**3
-    max_memory = torch.cuda.max_memory_allocated(device) / 1024**3
-    max_reserved = torch.cuda.max_memory_reserved(device) / 1024**3
-    print(f"{memory=:.3f}")
-    print(f"{max_memory=:.3f}")
-    print(f"{max_reserved=:.3f}")
-
-
-def pretty_print_results(results, precision: int = 6):
-    def format_value(value):
-        if isinstance(value, float):
-            return f"{value:.{precision}f}"
-        return value
-
-    filtered_table = {k: format_value(v) for k, v in results.items()}
-    print(tabulate([filtered_table], headers="keys", tablefmt="pipe", stralign="center"))
 
 
 def load_pipeline(model_id, dtype, device, quantize_vae, compile, fuse_qkv):
@@ -139,11 +109,8 @@ def run_inference(pipe):
     return video
 
 
-def main(dtype, device, quantize_vae, compile, fuse_qkv):
+def main(model_id, dtype, device, quantize_vae, compile, fuse_qkv):
     # 1. Load pipeline
-    # Models supported: "THUDM/CogVideoX-2b" or "THUDM/CogVideoX-5b"
-    model_id = "THUDM/CogVideoX-5b"
-
     pipe = load_pipeline(model_id, dtype, device, quantize_vae, compile, fuse_qkv)
 
     reset_memory(device)
@@ -178,24 +145,33 @@ def main(dtype, device, quantize_vae, compile, fuse_qkv):
     }
     pretty_print_results(info, precision=3)
 
-    export_to_video(
-        video.frames[0], f"output-quantization_{dtype}-compile_{compile}-fuse_qkv_{fuse_qkv}-{model_type}.mp4", fps=8
-    )
+    # Serialize artifacts
+    model_name = model_id.replace("/", "_").replace(".", "_")
+    filename_prefix = f"output-model_{model_name}-quantization_{dtype}-compile_{compile}-fuse_qkv_{fuse_qkv}"
+
+    with open(f"{filename_prefix}.json", "w") as file:
+        json.dump(info, file)
+    
+    export_to_video(video.frames[0], f"{filename_prefix}.mp4", fps=8)
 
 
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "--model_id",
+        type=str,
+        default="THUDM/CogVideoX-5b",
+        choices=["THUDM/CogVideoX-2b", "THUDM/CogVideoX-5b"],
+        help="Hub model or path to local model for which the benchmark is to be run.",
+    )
+    parser.add_argument(
         "--dtype",
         type=str,
-        default="fp16",
+        default="bf16",
         choices=[
-            "fp32",
             "fp16",
             "bf16",
             "fp8",
-            "fp8_e4m3",
-            "fp8_e5m2",
             "fp6",
             "int8wo",
             "int8dq",
@@ -231,4 +207,4 @@ def get_args():
 if __name__ == "__main__":
     args = get_args()
 
-    main(args.dtype, args.device, args.quantize_vae, args.compile, args.fuse_qkv)
+    main(args.model_id, args.dtype, args.device, args.quantize_vae, args.compile, args.fuse_qkv)

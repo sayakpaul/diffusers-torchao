@@ -4,16 +4,27 @@ TorchAO seamlessly integrates quantization into the PyTorch ecosystem. While per
 
 Following are two examples that demonstrate end-to-end serialization and de-serialization of quantized checkpoints:
 
-- [PixArt-Sigma](<TODO: add link to gist here>)
-- [CogVideoX-5b](https://gist.github.com/a-r-r-o-w/4d9732d17412888c885480c6521a9897#file-quantized_serialize_and_unserialized-py)
+- [Flux](https://gist.github.com/sayakpaul/e1f28e86d0756d587c0b898c73822c47)
+- [CogVideoX](https://gist.github.com/a-r-r-o-w/4d9732d17412888c885480c6521a9897#file-quantized_serialize_and_unserialized-py)
 
-### PixArt-Sigma
+### Flux
 
 ```python
-# TODO
+from diffusers import FluxTransformer2DModel
+from torchao.quantization import quantize_, int8_weight_only
+import torch 
+
+ckpt_id = "black-forest-labs/FLUX.1-schnell"
+
+transformer = FluxTransformer2DModel.from_pretrained(
+    ckpt_id, subfolder="transformer", torch_dtype=torch.bfloat16
+)
+quantize_(transformer, int8_weight_only())
+
+torch.save(transformer.state_dict(), "flux_schnell_int8wo.pt")
 ```
 
-### CogVideoX-5B
+### CogVideoX
 
 ```python
 import torch
@@ -24,7 +35,9 @@ from torchao.quantization import quantize_, int8_weight_only
 model_id = "THUDM/CogVideoX-5b"
 
 # Quantize and save the transformer
-transformer = CogVideoXTransformer3DModel.from_pretrained(model_id, subfolder="transformer", torch_dtype=torch.bfloat16)
+transformer = CogVideoXTransformer3DModel.from_pretrained(
+  model_id, subfolder="transformer", torch_dtype=torch.bfloat16
+)
 quantize_(transformer, int8_weight_only())
 
 torch.save(transformer.state_dict(), "cog-5b-transformer-int8.pt")
@@ -32,13 +45,32 @@ torch.save(transformer.state_dict(), "cog-5b-transformer-int8.pt")
 
 # Deserializing and loading a quantized model
 
-### PixArt-Sigma
+### Flux
 
 ```python
-# TODO
+import torch
+from huggingface_hub import hf_hub_download
+from diffusers import FluxTransformer2DModel, DiffusionPipeline
+
+dtype, device = torch.bfloat16, "cuda"
+ckpt_id = "black-forest-labs/FLUX.1-schnell"
+
+with torch.device("meta"):
+    config = FluxTransformer2DModel.load_config(ckpt_id, subfolder="transformer")
+    model = FluxTransformer2DModel.from_config(config).to(dtype)
+
+ckpt_path = hf_hub_download(repo_id="sayakpaul/flux.1-schell-int8wo", filename="flux_schnell_int8wo.pt")
+state_dict = torch.load(ckpt_path, map_location="cpu")
+model.load_state_dict(state_dict, assign=True)
+
+pipeline = DiffusionPipeline.from_pretrained(ckpt_id, transformer=model, torch_dtype=dtype).to("cuda")
+image = pipeline(
+	"cat", guidance_scale=0.0, num_inference_steps=4, max_sequence_length=256
+).images[0]
+image.save("flux_schnell_int8.png")
 ```
 
-### CogVideoX-5B
+### CogVideoX
 
 ```python
 import torch
