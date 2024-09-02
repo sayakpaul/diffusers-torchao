@@ -118,12 +118,14 @@ def run_inference(pipe, batch_size):
 
 
 def run_benchmark(pipeline, args):
+    model_memory = bytes_to_giga_bytes(torch.cuda.memory_allocated())  # in GBs.
+
     for _ in range(5):
         run_inference(pipeline, batch_size=args.batch_size)
 
     time = benchmark_fn(run_inference, pipeline, args.batch_size)
+    inference_memory = bytes_to_giga_bytes(torch.cuda.max_memory_allocated())
     torch.cuda.empty_cache()
-    memory = bytes_to_giga_bytes(torch.cuda.memory_allocated())  # in GBs.
 
     info = dict(
         ckpt_id=args.ckpt_id,
@@ -133,7 +135,8 @@ def run_benchmark(pipeline, args):
         compile_vae=args.compile_vae,
         quantization=args.quantization,
         sparsify=args.sparsify,
-        memory=memory,
+        model_memory=model_memory,
+        inference_memory=inference_memory,
         time=time,
     )
 
