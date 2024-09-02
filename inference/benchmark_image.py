@@ -4,7 +4,6 @@ import torch
 # This setting optimizes performance on NVIDIA GPUs with Ampere architecture (e.g., A100, RTX 30 series) or newer.
 torch.set_float32_matmul_precision("high")
 
-import torch.utils.benchmark as benchmark
 from diffusers import DiffusionPipeline
 
 from torchao.quantization import (
@@ -20,7 +19,7 @@ from torchao.sparsity import sparsify_, int8_dynamic_activation_int8_semi_sparse
 import argparse
 import json
 
-from utils import pretty_print_results, reset_memory
+from utils import benchmark_fn, pretty_print_results, reset_memory
 
 
 PROMPT = "Eiffel Tower was Made up of more than 2 million translucent straws to look like a cloud, with the bell tower at the top of the building, Michel installed huge foam-making machines in the forest to blow huge amounts of unpredictable wet clouds in the building's classic architecture."
@@ -34,15 +33,6 @@ PREFIXES = {
 
 def bytes_to_giga_bytes(bytes):
     return f"{(bytes / 1024 / 1024 / 1024):.3f}"
-
-
-def benchmark_fn(f, *args, **kwargs):
-    t0 = benchmark.Timer(
-        stmt="f(*args, **kwargs)",
-        globals={"args": args, "kwargs": kwargs, "f": f},
-        num_threads=torch.get_num_threads(),
-    )
-    return f"{(t0.blocked_autorange().mean):.3f}"
 
 
 def load_pipeline(

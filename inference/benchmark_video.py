@@ -5,7 +5,6 @@ import os
 os.environ["TORCH_LOGS"] = "+dynamo,output_code,graph_breaks,recompiles"
 
 import torch
-import torch.utils.benchmark as benchmark
 from diffusers import CogVideoXPipeline, CogVideoXDDIMScheduler
 from diffusers.utils import export_to_video
 from torchao.quantization import (
@@ -21,7 +20,7 @@ from torchao.sparsity import sparsify_
 from torchao.float8.inference import ActivationCasting, QuantConfig, quantize_to_float8
 from torchao.prototype.quant_llm import fp6_llm_weight_only
 
-from utils import pretty_print_results, print_memory, reset_memory
+from utils import benchmark_fn, pretty_print_results, print_memory, reset_memory
 
 # Set high precision for float32 matrix multiplications. 
 # This setting optimizes performance on NVIDIA GPUs with Ampere architecture (e.g., A100, RTX 30 series) or newer.
@@ -40,15 +39,6 @@ CONVERT_DTYPE = {
     "autoquant": lambda module: autoquant(module, error_on_unseen=False),
     "sparsify": lambda module: sparsify_(module, int8_dynamic_activation_int8_semi_sparse_weight()),
 }
-
-
-def benchmark_fn(f, *args, **kwargs):
-    t0 = benchmark.Timer(
-        stmt="f(*args, **kwargs)",
-        globals={"args": args, "kwargs": kwargs, "f": f},
-        num_threads=torch.get_num_threads(),
-    )
-    return f"{(t0.blocked_autorange().mean):.3f}"
 
 
 def load_pipeline(model_id, dtype, device, quantize_vae, compile, fuse_qkv):
