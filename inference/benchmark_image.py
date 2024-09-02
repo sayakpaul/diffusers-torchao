@@ -1,6 +1,6 @@
 import torch
 
-# Set high precision for float32 matrix multiplications. 
+# Set high precision for float32 matrix multiplications.
 # This setting optimizes performance on NVIDIA GPUs with Ampere architecture (e.g., A100, RTX 30 series) or newer.
 torch.set_float32_matmul_precision("high")
 
@@ -19,7 +19,7 @@ from torchao.sparsity import sparsify_, int8_dynamic_activation_int8_semi_sparse
 import argparse
 import json
 
-from utils import benchmark_fn, pretty_print_results, reset_memory
+from utils import benchmark_fn, pretty_print_results, reset_memory, bytes_to_giga_bytes
 
 
 PROMPT = "Eiffel Tower was Made up of more than 2 million translucent straws to look like a cloud, with the bell tower at the top of the building, Michel installed huge foam-making machines in the forest to blow huge amounts of unpredictable wet clouds in the building's classic architecture."
@@ -29,10 +29,6 @@ PREFIXES = {
     "fal/AuraFlow": "auraflow",
     "black-forest-labs/FLUX.1-dev": "flux-dev",
 }
-
-
-def bytes_to_giga_bytes(bytes):
-    return f"{(bytes / 1024 / 1024 / 1024):.3f}"
 
 
 def load_pipeline(
@@ -114,8 +110,8 @@ def run_benchmark(pipeline, args):
         run_inference(pipeline, batch_size=args.batch_size)
 
     time = benchmark_fn(run_inference, pipeline, args.batch_size)
-    inference_memory = bytes_to_giga_bytes(torch.cuda.max_memory_allocated())
     torch.cuda.empty_cache()
+    inference_memory = bytes_to_giga_bytes(torch.cuda.max_memory_allocated())
 
     info = dict(
         ckpt_id=args.ckpt_id,
@@ -155,7 +151,7 @@ if __name__ == "__main__":
         "--ckpt_id",
         default="black-forest-labs/FLUX.1-dev",
         type=str,
-        help="Hub model or path to local model for which the benchmark is to be run."
+        help="Hub model or path to local model for which the benchmark is to be run.",
     )
     parser.add_argument(
         "--fuse_attn_projections",
@@ -176,7 +172,7 @@ if __name__ == "__main__":
         default=1,
         type=int,
         choices=[1, 4, 8],
-        help="Number of images to generate for the testing prompt."
+        help="Number of images to generate for the testing prompt.",
     )
     args = parser.parse_args()
 

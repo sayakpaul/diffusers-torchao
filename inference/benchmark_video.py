@@ -22,7 +22,7 @@ from torchao.prototype.quant_llm import fp6_llm_weight_only
 
 from utils import benchmark_fn, pretty_print_results, print_memory, reset_memory
 
-# Set high precision for float32 matrix multiplications. 
+# Set high precision for float32 matrix multiplications.
 # This setting optimizes performance on NVIDIA GPUs with Ampere architecture (e.g., A100, RTX 30 series) or newer.
 torch.set_float32_matmul_precision("high")
 
@@ -142,7 +142,7 @@ def main(model_id, dtype, device, quantize_vae, compile, fuse_qkv):
 
     with open(f"{filename_prefix}.json", "w") as file:
         json.dump(info, file)
-    
+
     export_to_video(video.frames[0], f"{filename_prefix}.mp4", fps=8)
 
 
@@ -171,26 +171,26 @@ def get_args():
             "autoquant",
             "sparsify",
         ],
-        help="Inference or Quantization type."
+        help="Inference or Quantization type.",
     )
     parser.add_argument("--device", type=str, default="cuda", help="Device to run inference on.")
     parser.add_argument(
         "--quantize_vae",
         action="store_true",
         default=False,
-        help="Whether or not to quantize the CogVideoX VAE. Can lead to worse decoding results in some quantization cases."
+        help="Whether or not to quantize the CogVideoX VAE. Can lead to worse decoding results in some quantization cases.",
     )
     parser.add_argument(
         "--compile",
         action="store_true",
         default=False,
-        help="Whether or not to torch.compile the models. For our experiments with CogVideoX, we only compile the transformer."
+        help="Whether or not to torch.compile the models. For our experiments with CogVideoX, we only compile the transformer.",
     )
     parser.add_argument(
         "--fuse_qkv",
         action="store_true",
         default=False,
-        help="Whether or not to fuse the QKV projection layers into one larger layer."
+        help="Whether or not to fuse the QKV projection layers into one larger layer.",
     )
     return parser.parse_args()
 

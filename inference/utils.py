@@ -5,6 +5,10 @@ import torch.utils.benchmark as benchmark
 from tabulate import tabulate
 
 
+def bytes_to_giga_bytes(bytes):
+    return f"{(bytes / 1024 / 1024 / 1024):.3f}"
+
+
 def benchmark_fn(f, *args, **kwargs):
     t0 = benchmark.Timer(
         stmt="f(*args, **kwargs)",
