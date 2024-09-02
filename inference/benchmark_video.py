@@ -110,10 +110,11 @@ def run_inference(pipe):
 
 
 def main(model_id, dtype, device, quantize_vae, compile, fuse_qkv):
+    reset_memory(device)
+
     # 1. Load pipeline
     pipe = load_pipeline(model_id, dtype, device, quantize_vae, compile, fuse_qkv)
 
-    reset_memory(device)
     print_memory(device)
 
     torch.cuda.empty_cache()

@@ -103,3 +103,5 @@ video = pipe(
 ).frames[0]
 export_to_video(video, "output.mp4", fps=8)
 ```
+
+Note: Currently, saving quantized models in safetensors format is not supported, and one must use the pytorch tensor format. In the near future, serializing in safetensors will also be possible thanks to the efforts of [Jerry Zhang](https://github.com/jerryzh168) in [this PR](https://github.com/huggingface/safetensors/pull/516).
