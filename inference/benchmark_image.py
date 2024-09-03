@@ -10,11 +10,11 @@ from torchao.quantization import (
     int4_weight_only,
     int8_weight_only,
     int8_dynamic_activation_int8_weight,
+    float8_dynamic_activation_float8_weight,
+    float8_weight_only,
     quantize_,
     autoquant,
 )
-from torchao.float8.inference import ActivationCasting, QuantConfig, quantize_to_float8
-from torchao.prototype.quant_llm import fp6_llm_weight_only
 from torchao.sparsity import sparsify_, int8_dynamic_activation_int8_semi_sparse_weight
 import argparse
 import json
@@ -67,13 +67,18 @@ def load_pipeline(
             if compile_vae:
                 quantize_(pipeline.vae, int4_weight_only())
         elif quantization == "fp6":
+            from torchao.prototype.quant_llm import fp6_llm_weight_only
             quantize_(pipeline.transformer, fp6_llm_weight_only())
             if compile_vae:
                 quantize_(pipeline.vae, fp6_llm_weight_only())
-        elif quantization == "fp8":
-            pipeline.transformer = quantize_to_float8(pipeline.transformer, QuantConfig(ActivationCasting.DYNAMIC))
+        elif quantization == "fp8wo":
+            quantize_(pipeline.transformer, float8_weight_only())
             if compile_vae:
-                pipeline.vae = quantize_to_float8(pipeline.vae, QuantConfig(ActivationCasting.DYNAMIC))
+                quantize_(pipeline.vae, float8_weight_only())
+        elif quantization == "fp8dq":
+            quantize_(pipeline.transformer, float8_dynamic_activation_float8_weight())
+            if compile_vae:
+                quantize_(pipeline.vae, float8_dynamic_activation_float8_weight())
         elif quantization == "autoquant":
             pipeline.transformer = autoquant(pipeline.transformer, error_on_unseen=False)
             if compile_vae:
@@ -163,7 +168,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--quantization",
         default="None",
-        choices=["int8dq", "int8wo", "int4wo", "autoquant", "fp6", "fp8", "None"],
+        choices=["int8dq", "int8wo", "int4wo", "autoquant", "fp6", "fp8wo", "fp8dq", "None"],
         help="Which quantization technique to apply",
     )
     parser.add_argument("--sparsify", action="store_true")
@@ -176,7 +181,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    reset_memory()
+    reset_memory("cuda")
 
     pipeline = load_pipeline(
         ckpt_id=args.ckpt_id,
