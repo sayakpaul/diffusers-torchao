@@ -1,6 +1,8 @@
 # diffusers-torchao
 
-Optimize image and video generation with [`diffusers`](https://github.com/huggingface/diffusers), [`torchao`](https://github.com/pytorch/ao), combining `torch.compile()` 🔥 We provide end-to-end inference and experimental training recipes to use `torchao` with `diffusers` in this repo. We demonstrate XX% speedup on [Flux.1-Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) and YY% speedup on [Cog](https://huggingface.co/THUDM/CogVideoX-5b).
+**Optimize image and video generation with [`diffusers`](https://github.com/huggingface/diffusers), [`torchao`](https://github.com/pytorch/ao), combining `torch.compile()` 🔥** 
+
+We provide end-to-end inference and experimental training recipes to use `torchao` with `diffusers` in this repo. We demonstrate XX% speedup on [Flux.1-Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) and YY% speedup on [Cog](https://huggingface.co/THUDM/CogVideoX-5b).
 
 No-frills code:
 
