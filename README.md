@@ -6,6 +6,7 @@ No-frills code:
 
 ```diff
 from diffusers import FluxPipeline
++ from torchao.quantization import autoquant
 import torch 
 
 pipeline = FluxPipeline.from_pretrained(
@@ -61,7 +62,7 @@ In this section, we provide a non-exhaustive overview of the things we learned d
 
 * *Expected gains and their ceiling are dependent on the hardware being used*. For example, compute density of the operations popped on a GPU has an effect on on the speedup. For the same code, you may see better numbers on an A100 than H100, simply because the operations weren't compute-dense enough for H100. In these situations, bigger batch sizes might make the effect of using a better GPU like H100 more pronounced.
 
-* *Shapes matter*. Not all models are created equal. Certain shapes are friendlier in order for quantization to show its benefits over others. Usually, bigger shapes benefit quantization, resulting into speedups. The thinner the dimensions, the less pronounced the effects of quantization, especially for precisions like int8. In our case, using quantization on smaller models like [PixArt-Sigma](https://huggingface.co/PixArt-alpha/PixArt-Sigma-XL-2-1024-MS) wasn't particularly beneficial. 
+* *Shapes matter*. Not all models are created equal. Certain shapes are friendlier in order for quantization to show its benefits over others. Usually, bigger shapes benefit quantization, resulting into speedups. The thinner the dimensions, the less pronounced the effects of quantization, especially for precisions like int8. In our case, using quantization on smaller models like [PixArt-Sigma](https://huggingface.co/PixArt-alpha/PixArt-Sigma-XL-2-1024-MS) wasn't particularly beneficial. This is why, `torchao` provides an "autoquant" option that filters out smaller layers to exclude from quantization. 
 
 * *Small matmuls.* If the matmuls of the underlying are small enough or the performance without quantization isn't bottlenecked by weight load time, these techniques may reduce performance.
 
@@ -72,6 +73,6 @@ In this section, we provide a rundown of the scenarios that may prevent your mod
 * Ensure there are no graph-breaks when `torch.compile()` is applied on the model. Briefly, graph-breaks introduce
 unnecessary overheads blocking `torch.compile()` to obtain a full and dense graph of your model. In the case of Flux, we identified that it came from position embeddings, which was fixed in the following PRs: [#9307](https://github.com/huggingface/diffusers/pull/9307) and [#9321](https://github.com/huggingface/diffusers/pull/9321). Thanks to [Yiyi](https://github.com/yiyixuxu).
 
-* Use the `torch.profiler.profile()` to get a kernel trace to identify if there is any graph break. You could use a script like [this](https://github.com/huggingface/diffusion-fast/blob/main/run_profile.py). This will give you a JSON file which you can upload to https://ui.perfetto.dev/ to view the trace. 
+* Use the `torch.profiler.profile()` to get a kernel trace to identify if there is any graph break. You could use a script like [this](https://github.com/huggingface/diffusion-fast/blob/main/run_profile.py). This will give you a JSON file which you can upload to https://ui.perfetto.dev/ to view the trace. Additionally, use [this guide](https://pytorch.org/docs/stable/torch_cuda_memory.html) to validate the memory wins when using `torchao` for quantization and combining it with `torch.compile()`. 
 
 * Finally, [this `torch.compile()` manual](https://docs.google.com/document/d/1y5CRfMLdwEoF1nTk9q8qEu1mgMUuUtvhklPKJ2emLU8/edit#heading=h.ivdr7fmrbeab) is a gem of a reading to get an idea of how to go about approaching the profiling process.
