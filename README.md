@@ -159,7 +159,9 @@ Through visual inspection of various outputs, we identified that the best result
 
 ### CogVideoX memory savings
 
-- From the table, it can be seen that the memory required to load the standard bf16 model into memory is about `19.7` GB, and to run inference is about `31.7` GB. To keep the quality on par, let's quantize using int8 weight-only. This requires about `10.3` GB to load the memory in model, and `22.2` GB to run inference
+- From the table, it can be seen that the memory required to load the standard bf16 model into memory is about **19.7 GB**, and to run inference is about **31.7 GB**. To keep the quality on par, let's quantize using int8 weight-only. This requires about **10.3 GB** to load the memory in model, and **22.2 GB** to run inference: 
+<details>
+<summary>Code</summary>
 
 ```python3
 import torch
@@ -193,7 +195,8 @@ video = pipe(prompt=prompt, num_inference_steps=1).frames[0]
 export_to_video(video, "output.mp4", fps=8)
 ```
 
-- Let's enable CPU offloading for models as described in [diffusers-specific optimizations](#diffusers-specific-optimizations). Initially, no models are loaded onto the GPU and everything resides on the CPU. It requires about `10.3` to keep all components on the CPU. However, the peak memory used during inference drops to `12.4` GB. Note that inference will be slighly slower due to time required to move different modeling components between CPU to GPU and back.
+</details>
+- Let's enable CPU offloading for models as described in [diffusers-specific optimizations](#diffusers-specific-optimizations). Initially, no models are loaded onto the GPU and everything resides on the CPU. It requires about **10.3 GB** to keep all components on the CPU. However, the peak memory used during inference drops to **12.4 GB**. Note that inference will be slightly slower due to the time required to move different modeling components between CPU to GPU and back.
 
 ```diff
 pipe = CogVideoXPipeline.from_pretrained(
@@ -217,7 +220,7 @@ pipe.enable_model_cpu_offload()
 + pipe.vae.enable_tiling()
 ```
 
-Instead of `pipe.enable_model_cpu_offload()`, one can use `pipe.enable_sequential_cpu_offload()` that brings down memory usage to under `5` GB without quantization. With quantization, there are some errors with the combination of accelerate and torchao. Better support can be expected soon. Note that this comes with an enormous slowdown of 3-5x in inference time from our tests.
+Instead of `pipe.enable_model_cpu_offload()`, one can use `pipe.enable_sequential_cpu_offload()` that brings down memory usage to under **5 GB** without quantization. With quantization, there are some errors with the combination of accelerate and torchao. Better support can be expected soon. Note that this comes with an enormous slowdown of 3-5x in inference time from our tests.
 
 #### Diffusers-specific optimizations
 
