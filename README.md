@@ -2,7 +2,7 @@
 
 **Optimize image and video generation with [`diffusers`](https://github.com/huggingface/diffusers), [`torchao`](https://github.com/pytorch/ao), combining `torch.compile()` 🔥** 
 
-We provide end-to-end inference and experimental training recipes to use `torchao` with `diffusers` in this repo. We demonstrate XX% speedup on [Flux.1-Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) and 16% speedup on [CogVideoX](https://huggingface.co/THUDM/CogVideoX-5b) when comparing compiled quantized models against their compiled standard counterparts. The experiments were run on a single A100, 80 GB GPU.
+We provide end-to-end inference and experimental training recipes to use `torchao` with `diffusers` in this repo. We demonstrate **XX%** speedup* on [Flux.1-Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) and **21%** speedup** on [CogVideoX](https://huggingface.co/THUDM/CogVideoX-5b) when comparing *compiled* quantized models against their standard bf16 counterparts. The experiments were run on a single A100, 80 GB GPU.
 
 No-frills code:
 
@@ -30,6 +30,8 @@ Throw in `torch.compile()` to make it go brrr:
 ```
 
 This, alone, is sufficient to cut down inference time from X seconds to Y seconds on an H100. Check out the `inference` directory for the code.
+
+`**`: Quantizing to a supported datatype and using base precision as fp16 can lead to overflows. The recommended base precision for CogVideoX-2b is fp16 while that of CogVideoX-5b is bf16. If comparisons were to be made in fp16, the speedup gains would be **~23%** and **~32%** respectively.
 
 <h4>Table of contents</h4>
 
@@ -152,12 +154,77 @@ TODO(sayak): Flux benchmarks
 
 Through visual inspection of various outputs, we identified that the best results were achieved with int8 weight-only quantization, int8 dynamic quantization, fp8 (currently supported only on Hopper architecture), and autoquant. While the outputs sometimes differed visually from their standard fp16/bf16 counterparts, they maintained the expected quality. Additionally, we observed that int4 dynamic quantization generally produced satisfactory results in most cases, but showed greater deviation in structure, color, composition and motion.
 
-Note: From our testing and feedback from various folks that tried out torchao quantization after the release of CogVideoX, it was found that Ampere and above architectures had the best support for quantization dtypes. For other architectures such as Tesla or Volta, quantizing the models did not help save memory or the inference errored out. It was particularly pointed out to be erroneous with the Apple `mps` backend. Support for other architectures will only get better with time
+Note: From our testing and feedback from various folks that tried out torchao quantization after the release of CogVideoX, it was found that Ampere and above architectures had the best support for quantization dtypes. For other architectures such as Turing or Volta, quantizing the models did not help save memory or the inference errored out. It was particularly pointed out to be erroneous with the Apple `mps` backend. Support for other architectures will only get better with time.
+
+### CogVideoX memory savings
+
+1. From the table, it can be seen that the memory required to load the standard bf16 model into memory is about `19.7` GB, and to run inference is about `31.7` GB. To keep the quality on par, let's quantize using int8 weight-only. This requires about `10.3` GB to load the memory in model, and `22.2` GB to run inference
+
+```python3
+import torch
+from diffusers import AutoencoderKLCogVideoX, CogVideoXTransformer3DModel, CogVideoXPipeline
+from diffusers.utils import export_to_video
+from transformers import T5EncoderModel
+from torchao.quantization import quantize_, int8_weight_only
+
+model_id = "THUDM/CogVideoX-5b"
+
+text_encoder = T5EncoderModel.from_pretrained(model_id, subfolder="text_encoder", torch_dtype=torch.bfloat16)
+quantize_(text_encoder, int8_weight_only())
+
+transformer = CogVideoXTransformer3DModel.from_pretrained(model_id, subfolder="transformer", torch_dtype=torch.bfloat16)
+quantize_(transformer, int8_weight_only())
+
+vae = AutoencoderKLCogVideoX.from_pretrained(model_id, subfolder="vae", torch_dtype=torch.bfloat16)
+quantize_(vae, int8_weight_only())
+
+# Create pipeline and run inference
+pipe = CogVideoXPipeline.from_pretrained(
+    model_id,
+    text_encoder=text_encoder,
+    transformer=transformer,
+    vae=vae,
+    torch_dtype=torch.bfloat16,
+).to("cuda")
+
+prompt = "A panda, dressed in a small, red jacket and a tiny hat, sits on a wooden stool in a serene bamboo forest. The panda's fluffy paws strum a miniature acoustic guitar, producing soft, melodic tunes. Nearby, a few other pandas gather, watching curiously and some clapping in rhythm. Sunlight filters through the tall bamboo, casting a gentle glow on the scene. The panda's face is expressive, showing concentration and joy as it plays. The background includes a small, flowing stream and vibrant green foliage, enhancing the peaceful and magical atmosphere of this unique musical performance."
+video = pipe(prompt=prompt, num_inference_steps=1).frames[0]
+export_to_video(video, "output.mp4", fps=8)
+```
+
+2. Let's enable CPU offloading for models as described in [diffusers-specific optimizations](#diffusers-specific-optimizations). Initially, no models are loaded onto the GPU and everything resides on the GPU. It requires about `10.3` to keep all components on the CPU. However, the peak memory used during inference drops to `12.4` GB. Note that inference will be slighly slower due to time required to move different modeling components between CPU to GPU and back.
+
+```diff
+pipe = CogVideoXPipeline.from_pretrained(
+    model_id,
+    text_encoder=text_encoder,
+    transformer=transformer,
+    vae=vae,
+    torch_dtype=torch.bfloat16,
+- ).to("cuda")
++ )
+
++ pipe.enable_model_cpu_offload()
+```
+
+3. Let's enable VAE tiling as described in [diffusers-specific optimizations](#diffusers-specific-optimizations) to further reduce memory usage at inference to `7.9` GB.
+
+```diff
+pipe = ...
+pipe.enable_model_cpu_offload()
+
++ pipe.vae.enable_tiling()
+```
+
+Instead of `pipe.enable_model_cpu_offload()`, one can use `pipe.enable_sequential_cpu_offload()` that brings down memory usage to under `5` GB without quantization. With quantization, there are some errors with the combination of accelerate and torchao. Better support can be expected soon. Note that this comes with an enormous slowdown of 3-5x in inference time from our tests.
+
+#### Diffusers-specific optimizations
 
 For supported architectures, memory requirements could further be brought down using Diffusers-supported functionality:
 - `pipe.enable_model_cpu_offload()`: Only keeps the active Diffusers-used models (text encoder, transformer/unet, vae) on device
 - `pipe.enable_sequential_cpu_offload()`: Similar to above, but performs cpu offloading more aggressively by only keeping active torch modules on device
 - `pipe.vae.enable_vae_tiling()`: Enables tiled encoding/decoding by breaking up latents into smaller tiles and performing respective operation on each tile
+- `pipe.vae.enable_vae_slicing()`: Helps keep memory usage constant when generating more than one image/video at a time
 
 TODO: Make a note about ["autoquant"](https://github.com/pytorch/ao/tree/main/torchao/quantization#autoquantization) and "autotuning". 
 
