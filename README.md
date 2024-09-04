@@ -2,7 +2,9 @@
 
 **Optimize image and video generation with [`diffusers`](https://github.com/huggingface/diffusers), [`torchao`](https://github.com/pytorch/ao), combining `torch.compile()` 🔥** 
 
-We provide end-to-end inference and experimental training recipes to use `torchao` with `diffusers` in this repo. We demonstrate **XX%** speedup* on [Flux.1-Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) and **21%** speedup** on [CogVideoX-5b](https://huggingface.co/THUDM/CogVideoX-5b) when comparing *compiled* quantized models against their standard bf16 counterparts. The experiments were run on a single A100, 80 GB GPU.
+We provide end-to-end inference and experimental training recipes to use `torchao` with `diffusers` in this repo. We demonstrate **XX%** speedup on [Flux.1-Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) and **21%** speedup** on [CogVideoX-5b](https://huggingface.co/THUDM/CogVideoX-5b) when comparing *compiled* quantized models against their standard bf16 counterparts<sup>*</sup>. 
+
+<sub><sup>*</sup>The experiments were run on a single A100, 80 GB GPU.</sub>
 
 No-frills code:
 
@@ -29,9 +31,10 @@ Throw in `torch.compile()` to make it go brrr:
 +)
 ```
 
-This, alone, is sufficient to cut down inference time from X seconds to Y seconds on an H100. Check out the `inference` directory for the code.
+This, alone, is sufficient to cut down inference time for Flux.1-Dev from X seconds to Y seconds on an H100. Check out the [`inference`](./inference/) directory for the code.
 
-_`**`: Quantizing to a supported datatype and using base precision as fp16 can lead to overflows. The recommended base precision for CogVideoX-2b is fp16 while that of CogVideoX-5b is bf16. If comparisons were to be made in fp16, the speedup gains would be **~23%** and **~32%** respectively._
+> [!NOTE]
+> Quantizing to a supported datatype and using base precision as fp16 can lead to overflows. The recommended base precision for CogVideoX-2b is fp16 while that of CogVideoX-5b is bf16. If comparisons were to be made in fp16, the speedup gains would be **~23%** and **~32%** respectively.
 
 <h4>Table of contents</h4>
 
@@ -196,6 +199,7 @@ export_to_video(video, "output.mp4", fps=8)
 ```
 
 </details>
+
 - Let's enable CPU offloading for models as described in [diffusers-specific optimizations](#diffusers-specific-optimizations). Initially, no models are loaded onto the GPU and everything resides on the CPU. It requires about **10.3 GB** to keep all components on the CPU. However, the peak memory used during inference drops to **12.4 GB**. Note that inference will be slightly slower due to the time required to move different modeling components between CPU to GPU and back.
 
 ```diff
@@ -234,7 +238,7 @@ TODO: Make a note about ["autoquant"](https://github.com/pytorch/ao/tree/main/to
 
 ## Training with FP8
 
-Check out the `training` directory.
+Check out the [`training`](./training/) directory.
 
 ## Serialization and loading quantized models
 
