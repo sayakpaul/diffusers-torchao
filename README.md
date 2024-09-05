@@ -238,7 +238,35 @@ For supported architectures, memory requirements could further be brought down u
 - `pipe.vae.enable_vae_tiling()`: Enables tiled encoding/decoding by breaking up latents into smaller tiles and performing respective operation on each tile
 - `pipe.vae.enable_vae_slicing()`: Helps keep memory usage constant when generating more than one image/video at a time
 
-TODO: Make a note about ["autoquant"](https://github.com/pytorch/ao/tree/main/torchao/quantization#autoquantization) and "autotuning". 
+### Autoquant and autotuning
+
+Given these many options around quantization, which one do I choose for my model? Enter ["autoquant"](https://github.com/pytorch/ao/tree/main/torchao/quantization#autoquantization). It tries quickly and accurately quantize your model. By the end of the process, it creates a "quantization plan" which can be accessed through `AUTOQUANT_CACHE` and reused. 
+
+So, we would essentially do after performing quantization with autoquant and benchmarking:
+
+```python
+from torchao.quantization.autoquant import AUTOQUANT_CACHE
+import pickle 
+
+with open("quantization-cache.pkl", "wb") as f:
+    pickle.dump(AUTOQUANT_CACHE)
+```
+
+And then to reuse the plan, we would do in our final codebase:
+
+```python
+from torchao.quantization.autoquant import AUTOQUANT_CACHE
+with open("quantization-cache.pkl", "rb") as f:
+    AUTOQUANT_CACHE.update(pickle.load(f))
+```
+
+Know more about "autoquant" [here](https://github.com/pytorch/ao/tree/main/torchao/quantization#autoquantization). 
+
+Another useful (but time-consuming) feature of `torchao` is ["autotuning"](https://github.com/pytorch/ao/tree/main/torchao/kernel). It tunes the `int_scaled_matmul` kernel for int8 dynamic + int8 weight quantization for the shape at runtime (given the shape of tensor passed to `int_scaled_matmul` op). Through this process, it tries to identify the most efficient kernel configurations for a given model and inputs.
+
+To launch quantization benchmarking with autotuning, we need to enable the `TORCHAO_AUTOTUNER_ENABLE`. So, essentially: `TORCHAO_AUTOTUNER_ENABLE=1 TORCHAO_AUTOTUNER_DATA_PATH=my_data.pkl python my_script.py`. And when it's done, we can simply reuse the configs it found by doing: `TORCHAO_AUTOTUNER_DATA_PATH=my_data.pkl python my_script.py`. 
+
+If you're using autotuning, keep in mind that it only works for intX quantization, for now and it is quite time-consuming. 
 
 ## Training with FP8
 
