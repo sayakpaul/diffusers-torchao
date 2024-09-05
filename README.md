@@ -298,3 +298,7 @@ unnecessary overheads blocking `torch.compile()` to obtain a full and dense grap
 * Use the `torch.profiler.profile()` to get a kernel trace to identify if there is any graph break. You could use a script like [this](https://github.com/huggingface/diffusion-fast/blob/main/run_profile.py). This will give you a JSON file which you can upload to https://ui.perfetto.dev/ to view the trace. Additionally, use [this guide](https://pytorch.org/docs/stable/torch_cuda_memory.html) to validate the memory wins when using `torchao` for quantization and combining it with `torch.compile()`. 
 
 * Finally, [this `torch.compile()` manual](https://docs.google.com/document/d/1y5CRfMLdwEoF1nTk9q8qEu1mgMUuUtvhklPKJ2emLU8/edit#heading=h.ivdr7fmrbeab) is a gem of a reading to get an idea of how to go about approaching the profiling process.
+
+## Acknowledgement
+
+Thanks to the PyTorch AO team for help and guidance.
