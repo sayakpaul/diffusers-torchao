@@ -2,9 +2,10 @@
 
 **Optimize image and video generation with [`diffusers`](https://github.com/huggingface/diffusers), [`torchao`](https://github.com/pytorch/ao), combining `torch.compile()` 🔥** 
 
-We provide end-to-end inference and experimental training recipes to use `torchao` with `diffusers` in this repo. We demonstrate **XX%** speedup on [Flux.1-Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) and **21%** speedup on [CogVideoX-5b](https://huggingface.co/THUDM/CogVideoX-5b) when comparing *compiled* quantized models against their standard bf16 counterparts<sup>*</sup>. 
+We provide end-to-end inference and experimental training recipes to use `torchao` with `diffusers` in this repo. We demonstrate **48.86%** speedup on [Flux.1-Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev)<sup>*</sup> and **21%** speedup on [CogVideoX-5b](https://huggingface.co/THUDM/CogVideoX-5b) when comparing *compiled* quantized models against their standard bf16 counterparts<sup>**</sup>. 
 
-<sub><sup>*</sup>The experiments were run on a single A100, 80 GB GPU.</sub>
+<sub><sup>*</sup>The experiments were run on a single H100, 80 GB GPU.</sub>
+<sub><sup>**</sup>The experiments were run on a single A100, 80 GB GPU.</sub>
 
 No-frills code:
 
@@ -31,7 +32,7 @@ Throw in `torch.compile()` to make it go brrr:
 +)
 ```
 
-This, alone, is sufficient to cut down inference time for Flux.1-Dev from X seconds to Y seconds on an H100. Check out the [`inference`](./inference/) directory for the code.
+This, alone, is sufficient to cut down inference time for Flux.1-Dev from 6.431 seconds to 3.483 seconds on an H100. Check out the [`inference`](./inference/) directory for the code.
 
 > [!NOTE]
 > Quantizing to a supported datatype and using base precision as fp16 can lead to overflows. The recommended base precision for CogVideoX-2b is fp16 while that of CogVideoX-5b is bf16. If comparisons were to be made in fp16, the speedup gains would be **~23%** and **~32%** respectively.
@@ -55,16 +56,23 @@ We always default to using the PyTorch nightly, updated `diffusers` and `torchao
 
 We benchmark two models ([Flux.1-Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) and [CogVideoX](https://huggingface.co/THUDM/CogVideoX-5b)) using different supported quantization datatypes in `torchao`. The results are as follows:
 
-TODO: Find out what the best way of presenting all the information is. Having multiple giant table might be difficult to parse visually.
+
+## Flux.1 Dev Benchmarks
+
+![](https://huggingface.co/datasets/sayakpaul/sample-datasets/resolve/main/flux_1_dev_plot.png)
 
 <details>
-<summary> Flux Benchmarks </summary>
-
-TODO(sayak): Flux benchmarks
+<summary>Additional Results</summary>
 </details>
 
+Note that we can additionally compile the VAE too and it should work with most of the quantization schemes: `pipeline.vae.decode = torch.compile(pipeline.vae.decode, mode="max-autotune", fullgraph=True)`, but the sake of simplicity, we decided to not include it.
+
+## CogVideoX Benchmarks
+
+![](https://huggingface.co/datasets/a-r-r-o-w/randoms/resolve/main/cogvideox-torchao-a100.png)
+
 <details>
-<summary> CogVideoX Benchmarks </summary>
+<summary>CogVideoX Benchmarks</summary>
 
 **A100**
 
@@ -267,6 +275,9 @@ Another useful (but time-consuming) feature of `torchao` is ["autotuning"](https
 To launch quantization benchmarking with autotuning, we need to enable the `TORCHAO_AUTOTUNER_ENABLE`. So, essentially: `TORCHAO_AUTOTUNER_ENABLE=1 TORCHAO_AUTOTUNER_DATA_PATH=my_data.pkl python my_script.py`. And when it's done, we can simply reuse the configs it found by doing: `TORCHAO_AUTOTUNER_DATA_PATH=my_data.pkl python my_script.py`. 
 
 If you're using autotuning, keep in mind that it only works for intX quantization, for now and it is quite time-consuming. 
+
+> [!NOTE]
+> Autoquant and autotuning are two different features.
 
 ## Training with FP8
 
