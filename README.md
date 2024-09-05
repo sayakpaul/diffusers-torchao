@@ -59,7 +59,16 @@ We benchmark two models ([Flux.1-Dev](https://huggingface.co/black-forest-labs/F
 
 ## Flux.1 Dev Benchmarks
 
-![](https://huggingface.co/datasets/sayakpaul/sample-datasets/resolve/main/flux_1_dev_plot.png)
+<table align="center">
+  <tr>
+    <th align="center">Flux-Dev</th>
+    <th align="center">CogVideoX-5b</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="https://huggingface.co/datasets/sayakpaul/sample-datasets/resolve/main/flux_1_dev_plot.png" /></th>
+    <td align="center"><img src="https://huggingface.co/datasets/a-r-r-o-w/randoms/resolve/main/cogvideox-torchao-a100.png" /></th>
+  </tr>
+</table>
 
 <details>
 <summary>Additional Results</summary>
