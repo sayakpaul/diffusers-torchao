@@ -47,6 +47,10 @@ This, alone, is sufficient to cut down inference time for Flux.1-Dev from X seco
 
 ## Environment
 
+We conducted all our experiments on a single A100 (80GB) and H100 GPUs. Since we wanted to benefit from `torch.compile()`, we used relatively modern cards here. For older cards, same memory savings (demonstrated more below) can be obtained.
+
+We always default to using the PyTorch nightly, updated `diffusers` and `torchao` codebases. We used CUDA 12.2.
+
 ## Benchmarking results
 
 We benchmark two models ([Flux.1-Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) and [CogVideoX](https://huggingface.co/THUDM/CogVideoX-5b)) using different supported quantization datatypes in `torchao`. The results are as follows:
