@@ -59,22 +59,17 @@ We benchmark two models ([Flux.1-Dev](https://huggingface.co/black-forest-labs/F
 
 ## Flux.1 Dev Benchmarks
 
-<table align="center">
-  <tr>
-    <th align="center">Flux-Dev</th>
-    <th align="center">CogVideoX-5b</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="https://huggingface.co/datasets/sayakpaul/sample-datasets/resolve/main/flux_1_dev_plot.png" /></th>
-    <td align="center"><img src="https://huggingface.co/datasets/a-r-r-o-w/randoms/resolve/main/cogvideox-torchao-a100.png" /></th>
-  </tr>
-</table>
+![](https://huggingface.co/datasets/sayakpaul/sample-datasets/resolve/main/flux_1_dev_plot.png)
 
 <details>
 <summary>Additional Results</summary>
 </details>
 
 Note that we can additionally compile the VAE too and it should work with most of the quantization schemes: `pipeline.vae.decode = torch.compile(pipeline.vae.decode, mode="max-autotune", fullgraph=True)`, but the sake of simplicity, we decided to not include it.
+
+## CogVideoX Benchmarks
+
+![](https://huggingface.co/datasets/a-r-r-o-w/randoms/resolve/main/cogvideox-torchao-a100.png)
 
 <details>
 <summary>CogVideoX Benchmarks</summary>
