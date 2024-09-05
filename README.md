@@ -240,7 +240,7 @@ For supported architectures, memory requirements could further be brought down u
 
 ### Autoquant and autotuning
 
-Given these many options around quantization, which one do I choose for my model? Enter ["autoquant"](https://github.com/pytorch/ao/tree/main/torchao/quantization#autoquantization). It tries quickly and accurately quantize your model. By the end of the process, it creates a "quantization plan" which can be accessed through `AUTOQUANT_CACHE` and reused. 
+Given these many options around quantization, which one do I choose for my model? Enter ["autoquant"](https://github.com/pytorch/ao/tree/main/torchao/quantization#autoquantization). It tries to quickly and accurately quantize your model. By the end of the process, it creates a "quantization plan" which can be accessed through `AUTOQUANT_CACHE` and reused. 
 
 So, we would essentially do after performing quantization with autoquant and benchmarking:
 
