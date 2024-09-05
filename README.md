@@ -65,6 +65,8 @@ We benchmark two models ([Flux.1-Dev](https://huggingface.co/black-forest-labs/F
 <summary>Additional Results</summary>
 </details>
 
+Note that we can additionally compile the VAE too and it should work with most of the quantization schemes: `pipeline.vae.decode = torch.compile(pipeline.vae.decode, mode="max-autotune", fullgraph=True)`, but the sake of simplicity, we decided to not include it.
+
 <details>
 <summary>CogVideoX Benchmarks</summary>
 
@@ -269,6 +271,9 @@ Another useful (but time-consuming) feature of `torchao` is ["autotuning"](https
 To launch quantization benchmarking with autotuning, we need to enable the `TORCHAO_AUTOTUNER_ENABLE`. So, essentially: `TORCHAO_AUTOTUNER_ENABLE=1 TORCHAO_AUTOTUNER_DATA_PATH=my_data.pkl python my_script.py`. And when it's done, we can simply reuse the configs it found by doing: `TORCHAO_AUTOTUNER_DATA_PATH=my_data.pkl python my_script.py`. 
 
 If you're using autotuning, keep in mind that it only works for intX quantization, for now and it is quite time-consuming. 
+
+> [!NOTE]
+> Autoquant and autotuning are two different features.
 
 ## Training with FP8
 
