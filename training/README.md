@@ -3,7 +3,7 @@
 > [!IMPORTANT]  
 > Since we are utilizing FP8 tensor cores we need CUDA GPUs with compute capability at least 8.9 or greater. If you're looking for memory-efficient training on relatively older cards, we encourage you to check out other trainers like [SimpleTuner](https://github.com/bghira/SimpleTuner), [ai-toolkit](https://github.com/ostris/ai-toolkit/), etc.
 
-Please refer to [this document](https://gist.github.com/sayakpaul/f0358dd4f4bcedf14211eba5704df25a) for full code. It is basically modification of the original `diffusers` [DreamBooth LoRA training script](https://github.com/huggingface/diffusers/blob/main/examples/dreambooth/train_dreambooth_lora_flux.py) (for Flux.1-Dev) for enabling FP8 training support. 
+Please refer to [this document](https://gist.github.com/sayakpaul/f0358dd4f4bcedf14211eba5704df25a) for full code. It shows end-to-end training, serialization, and inference. It is basically modification of the original `diffusers` [DreamBooth LoRA training script](https://github.com/huggingface/diffusers/blob/main/examples/dreambooth/train_dreambooth_lora_flux.py) (for Flux.1-Dev) for enabling FP8 training support. 
 
 ## Summary of the changes required
 
