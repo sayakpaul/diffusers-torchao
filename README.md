@@ -2,9 +2,10 @@
 
 **Optimize image and video generation with [`diffusers`](https://github.com/huggingface/diffusers), [`torchao`](https://github.com/pytorch/ao), combining `torch.compile()` 🔥** 
 
-We provide end-to-end inference and experimental training recipes to use `torchao` with `diffusers` in this repo. We demonstrate **48.86%** speedup on [Flux.1-Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) and **21%** speedup on [CogVideoX-5b](https://huggingface.co/THUDM/CogVideoX-5b) when comparing *compiled* quantized models against their standard bf16 counterparts<sup>*</sup>. 
+We provide end-to-end inference and experimental training recipes to use `torchao` with `diffusers` in this repo. We demonstrate **48.86%** speedup on [Flux.1-Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev)<sup>*</sup> and **21%** speedup on [CogVideoX-5b](https://huggingface.co/THUDM/CogVideoX-5b) when comparing *compiled* quantized models against their standard bf16 counterparts<sup>**</sup>. 
 
-<sub><sup>*</sup>The experiments were run on a single A100, 80 GB GPU.</sub>
+<sub><sup>*</sup>The experiments were run on a single H100, 80 GB GPU.</sub>
+<sub><sup>**</sup>The experiments were run on a single A100, 80 GB GPU.</sub>
 
 No-frills code:
 
