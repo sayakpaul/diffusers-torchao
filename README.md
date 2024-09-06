@@ -292,7 +292,7 @@ pipe = CogVideoXPipeline.from_pretrained(
 + pipe.enable_model_cpu_offload()
 ```
 
-- Let's enable VAE tiling as described in [diffusers-specific optimizations](#diffusers-specific-optimizations) to further reduce memory usage at inference to `7.9` GB.
+- Let's enable VAE tiling as described in [diffusers-specific optimizations](#diffusers-specific-optimizations) to further reduce memory usage at inference to **7.9** GB.
 
 ```diff
 pipe = ...
@@ -301,7 +301,18 @@ pipe.enable_model_cpu_offload()
 + pipe.vae.enable_tiling()
 ```
 
-Instead of `pipe.enable_model_cpu_offload()`, one can use `pipe.enable_sequential_cpu_offload()` that brings down memory usage to under **5 GB** without quantization. With quantization, there are some errors with the combination of accelerate and torchao. Better support can be expected soon. Note that this comes with an enormous slowdown of 3-5x in inference time from our tests.
+- Instead of `pipe.enable_model_cpu_offload()`, one can use `pipe.enable_sequential_cpu_offload()` that brings down memory usage to **4.8 GB** without quantization and **3.1 GB** with quantization. Note that sequential cpu offloading comes at a tradeoff with much more time required during inference. You are required to install `accelerate` from source until next release for this to work without any errors.
+
+```diff
+pipe = ...
+- pipe.enable_model_cpu_offload()
++ pipe.enable_sequential_cpu_offload()
+
++ pipe.vae.enable_tiling()
+```
+
+> [!NOTE]
+> We use `torch.cuda.max_memory_allocated()` to report the peak memory values.
 
 #### Diffusers-specific optimizations
 
