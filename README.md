@@ -301,7 +301,7 @@ pipe.enable_model_cpu_offload()
 + pipe.vae.enable_tiling()
 ```
 
-- Instead of `pipe.enable_model_cpu_offload()`, one can use `pipe.enable_sequential_cpu_offload()` that brings down memory usage to **4.8 GB** without quantization and **3.1 GB** with quantization. Note that you are required to install `accelerate` from source until next release for this to work without any errors.
+- Instead of `pipe.enable_model_cpu_offload()`, one can use `pipe.enable_sequential_cpu_offload()` that brings down memory usage to **4.8 GB** without quantization and **3.1 GB** with quantization. Note that sequential cpu offloading comes at a tradeoff with much more time required during inference. You are required to install `accelerate` from source until next release for this to work without any errors.
 
 ```diff
 pipe = ...
