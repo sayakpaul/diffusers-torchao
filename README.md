@@ -377,4 +377,10 @@ unnecessary overheads blocking `torch.compile()` to obtain a full and dense grap
 
 ## Acknowledgement
 
-Thanks to the PyTorch AO team for help and guidance.
+We acknowledge the generous help and guidance provided by the PyTorch team throughout the development of this project:
+
+* [Christian Puhrsch](https://github.com/cpuhrsch) for guidance on removing graph-breaks and general `torch.compile()` stuff
+* [Jerry Zhang](https://github.com/jerryzh168) for different `torchao` stuff (microbenchmarks, serialization, misc discussions)
+* [Driss Guessous](https://github.com/drisspg/) for all things FP8
+* [Jesse Cai](https://github.com/jcaip) for help on `int8_dynamic_activation_int8_semi_sparse_weight`
+* [Mark Saroufim](https://github.com/msaroufim) for reviews, discussions, and navigation 
