@@ -63,7 +63,72 @@ We benchmark two models ([Flux.1-Dev](https://huggingface.co/black-forest-labs/F
 
 <details>
 <summary>Additional Results</summary>
+
+| ckpt_id                      |   batch_size | fuse   | compile   | compile_vae   | quantization   | sparsify   |   model_memory |   inference_memory |    time |
+|:-----------------------------|-------------:|:-------|:----------|:--------------|:---------------|:-----------|---------------:|-------------------:|--------:|
+| black-forest-labs/FLUX.1-dev |            4 | True   | True      | False         | fp8wo          | False      |         22.368 |             35.616 |  16.204 |
+| black-forest-labs/FLUX.1-dev |            8 | False  | False     | False         | None           | False      |         31.438 |             47.509 |  49.438 |
+| black-forest-labs/FLUX.1-dev |            8 | False  | True      | False         | None           | False      |         31.439 |             47.506 |  31.685 |
+| black-forest-labs/FLUX.1-dev |            1 | False  | True      | False         | int8dq         | False      |         20.386 |             31.608 |   3.406 |
+| black-forest-labs/FLUX.1-dev |            4 | False  | True      | False         | int8wo         | False      |         20.387 |             31.609 |  16.08  |
+| black-forest-labs/FLUX.1-dev |            8 | False  | True      | False         | fp8dq          | False      |         20.357 |             36.425 |  23.393 |
+| black-forest-labs/FLUX.1-dev |            8 | True   | True      | False         | int8dq         | False      |         22.397 |             38.464 |  24.696 |
+| black-forest-labs/FLUX.1-dev |            8 | False  | False     | False         | int8dq         | False      |         20.386 |             36.458 | 333.567 |
+| black-forest-labs/FLUX.1-dev |            4 | True   | False     | False         | fp8dq          | False      |         22.361 |             35.826 |  26.259 |
+| black-forest-labs/FLUX.1-dev |            8 | False  | True      | False         | int8dq         | False      |         20.386 |             36.453 |  24.725 |
+| black-forest-labs/FLUX.1-dev |            1 | True   | True      | False         | int8wo         | False      |         22.396 |             35.616 |   4.574 |
+| black-forest-labs/FLUX.1-dev |            1 | False  | True      | False         | fp8wo          | False      |         20.363 |             31.607 |   4.395 |
+| black-forest-labs/FLUX.1-dev |            8 | True   | False     | False         | int8wo         | False      |         22.397 |             38.468 |  57.274 |
+| black-forest-labs/FLUX.1-dev |            4 | True   | False     | False         | int8dq         | False      |         22.396 |             35.616 | 219.687 |
+| black-forest-labs/FLUX.1-dev |            4 | False  | False     | False         | None           | False      |         31.438 |             39.49  |  24.828 |
+| black-forest-labs/FLUX.1-dev |            1 | True   | True      | False         | fp8dq          | False      |         22.363 |             35.827 |   3.192 |
+| black-forest-labs/FLUX.1-dev |            1 | False  | False     | False         | fp8dq          | False      |         20.356 |             31.817 |   8.622 |
+| black-forest-labs/FLUX.1-dev |            8 | False  | False     | False         | fp8dq          | False      |         20.357 |             36.428 |  55.097 |
+| black-forest-labs/FLUX.1-dev |            4 | False  | False     | False         | int8wo         | False      |         20.384 |             31.606 |  29.414 |
+| black-forest-labs/FLUX.1-dev |            1 | True   | False     | False         | fp8wo          | False      |         22.371 |             35.618 |   8.33  |
+| black-forest-labs/FLUX.1-dev |            1 | False  | False     | False         | int8dq         | False      |         20.386 |             31.608 | 130.498 |
+| black-forest-labs/FLUX.1-dev |            8 | True   | True      | False         | fp8wo          | False      |         22.369 |             38.436 |  31.718 |
+| black-forest-labs/FLUX.1-dev |            4 | False  | False     | False         | fp8wo          | False      |         20.363 |             31.607 |  26.61  |
+| black-forest-labs/FLUX.1-dev |            1 | True   | False     | False         | int8wo         | False      |         22.397 |             35.616 |   8.49  |
+| black-forest-labs/FLUX.1-dev |            8 | True   | False     | False         | fp8dq          | False      |         22.363 |             38.433 |  51.547 |
+| black-forest-labs/FLUX.1-dev |            4 | False  | True      | False         | fp8dq          | False      |         20.359 |             31.82  |  11.919 |
+| black-forest-labs/FLUX.1-dev |            4 | False  | True      | False         | None           | False      |         31.438 |             39.488 |  15.948 |
+| black-forest-labs/FLUX.1-dev |            4 | True   | True      | False         | int8dq         | False      |         22.397 |             35.616 |  12.594 |
+| black-forest-labs/FLUX.1-dev |            1 | True   | True      | False         | fp8wo          | False      |         22.369 |             35.616 |   4.326 |
+| black-forest-labs/FLUX.1-dev |            4 | True   | False     | False         | int8wo         | False      |         22.397 |             35.617 |  29.394 |
+| black-forest-labs/FLUX.1-dev |            1 | False  | False     | False         | fp8wo          | False      |         20.362 |             31.607 |   8.402 |
+| black-forest-labs/FLUX.1-dev |            8 | True   | False     | False         | int8dq         | False      |         22.397 |             38.468 | 322.688 |
+| black-forest-labs/FLUX.1-dev |            1 | False  | False     | False         | int8wo         | False      |         20.385 |             31.607 |   8.551 |
+| black-forest-labs/FLUX.1-dev |            8 | True   | True      | False         | fp8dq          | False      |         22.363 |             38.43  |  23.261 |
+| black-forest-labs/FLUX.1-dev |            4 | False  | False     | False         | fp8dq          | False      |         20.356 |             31.817 |  28.154 |
+| black-forest-labs/FLUX.1-dev |            1 | True   | False     | False         | int8dq         | False      |         22.397 |             35.616 | 119.736 |
+| black-forest-labs/FLUX.1-dev |            8 | True   | False     | False         | fp8wo          | False      |         22.369 |             38.441 |  51.311 |
+| black-forest-labs/FLUX.1-dev |            4 | False  | True      | False         | fp8wo          | False      |         20.363 |             31.607 |  16.232 |
+| black-forest-labs/FLUX.1-dev |            4 | True   | True      | False         | int8wo         | False      |         22.399 |             35.619 |  16.158 |
+| black-forest-labs/FLUX.1-dev |            8 | False  | False     | False         | fp8wo          | False      |         20.363 |             36.434 |  51.223 |
+| black-forest-labs/FLUX.1-dev |            4 | False  | False     | False         | int8dq         | False      |         20.385 |             31.607 | 221.588 |
+| black-forest-labs/FLUX.1-dev |            1 | True   | False     | False         | fp8dq          | False      |         22.364 |             35.829 |   7.34  |
+| black-forest-labs/FLUX.1-dev |            1 | False  | False     | False         | None           | False      |         31.438 |             33.851 |   6.573 |
+| black-forest-labs/FLUX.1-dev |            4 | True   | True      | False         | fp8dq          | False      |         22.363 |             35.827 |  11.885 |
+| black-forest-labs/FLUX.1-dev |            1 | False  | True      | False         | int8wo         | False      |         20.384 |             31.606 |   4.615 |
+| black-forest-labs/FLUX.1-dev |            8 | False  | True      | False         | int8wo         | False      |         20.386 |             36.453 |  31.159 |
+| black-forest-labs/FLUX.1-dev |            1 | True   | True      | False         | int8dq         | False      |         22.397 |             35.617 |   3.357 |
+| black-forest-labs/FLUX.1-dev |            1 | False  | True      | False         | fp8dq          | False      |         20.357 |             31.818 |   3.243 |
+| black-forest-labs/FLUX.1-dev |            4 | False  | True      | False         | int8dq         | False      |         20.384 |             31.606 |  12.513 |
+| black-forest-labs/FLUX.1-dev |            8 | False  | True      | False         | fp8wo          | False      |         20.363 |             36.43  |  31.783 |
+| black-forest-labs/FLUX.1-dev |            1 | False  | True      | False         | None           | False      |         31.438 |             33.851 |   4.209 |
+| black-forest-labs/FLUX.1-dev |            8 | False  | False     | False         | int8wo         | False      |         20.386 |             36.457 |  57.026 |
+| black-forest-labs/FLUX.1-dev |            8 | True   | True      | False         | int8wo         | False      |         22.397 |             38.464 |  31.216 |
+| black-forest-labs/FLUX.1-dev |            4 | True   | False     | False         | fp8wo          | False      |         22.368 |             35.616 |  26.716 |
+
 </details>
+
+### Trade-offs, trade-offs, and more trade-offs
+
+We know that the table included above is hard to parse. So, we wanted to include a couple of points that are worth noting. 
+
+* Select the quantization technique that gives you the best trade-off between memory and latency. 
+* A quantization technique may exhibit different optimal settings for a given batch size. For example, for a batch size of 4, `int8dq` gives best time without any QKV fusion. But for other batch sizes, that is not the case.
 
 Note that we can additionally compile the VAE too and it should work with most of the quantization schemes: `pipeline.vae.decode = torch.compile(pipeline.vae.decode, mode="max-autotune", fullgraph=True)`, but the sake of simplicity, we decided to not include it.
 
