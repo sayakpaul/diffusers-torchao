@@ -41,6 +41,7 @@ This, alone, is sufficient to cut down inference time for Flux.1-Dev from 6.431 
 
 * [Environment](#environment)
 * [Benchmarking results](#benchmarking-results)
+* [Reducing quantization time and peak memory](#reducing-quantization-time-and-peak-memory)
 * [Training with FP8](#training-with-fp8)
 * [Serialization and loading quantized models](#serialization-and-loading-quantized-models)
 * [Things to keep in mind when benchmarking](#things-to-keep-in-mind-when-benchmarking)
@@ -354,6 +355,32 @@ If you're using autotuning, keep in mind that it only works for intX quantizatio
 
 > [!NOTE]
 > Autoquant and autotuning are two different features.
+
+## Reducing quantization time and peak memory
+
+If we keep the model on CPU and quantize it, it takes a long time while keeping the peak memory minimum. How about we do both i.e., quantize fast while keeping peak memory to a bare minimum? 
+
+It is possible to pass a `device` argument to the `quantize_()` method of `torchao`. It basically moves the model to CUDA and quantizes each parameter individually:  
+
+```py
+quantize_(model, int8_weight_only(), device="cuda")
+```
+
+Here's a comparison:
+
+```bash
+Quantize on CPU:
+  - Time taken: 10.48 s
+  - Peak memory: 6.99 GiB
+Quantize on CUDA:
+  - Time taken: 1.96 s
+  - Peak memory: 14.50 GiB
+Move to CUDA and quantize each param individually:
+  - Time taken: 1.94 s
+  - Peak memory: 8.29 GiB
+```
+
+Check out this [pull request](https://github.com/pytorch/ao/pull/699) for more details. 
 
 ## Training with FP8
 
