@@ -70,6 +70,18 @@ image = pipeline(
 image.save("flux_schnell_int8.png")
 ```
 
+You can refer to [this gist](https://gist.github.com/sayakpaul/1f543120a3c4d6ffebb682bbc80f9805) that also benchmarks the time and memory of the loaded quantized model. From the Flux.1-Dev benchmarks, we already know that `int8wo` latency is more than the non-quantized variant. The gain is in reduced memory consumption. Below are the numbers obtained on an H100:
+
+```
+no quant
+time='0.660' seconds.
+memory='31.451' GB.
+
+int8wo
+time='0.735' seconds.
+memory='20.517' GB.
+```
+
 ### CogVideoX
 
 ```python
@@ -106,4 +118,5 @@ video = pipe(
 export_to_video(video, "output.mp4", fps=8)
 ```
 
-Note: Currently, saving quantized models in safetensors format is not supported, and one must use the pytorch tensor format. In the near future, serializing in safetensors will also be possible thanks to the efforts of [Jerry Zhang](https://github.com/jerryzh168) in [this PR](https://github.com/huggingface/safetensors/pull/516).
+> [!IMPORTANT]  
+> Currently, saving quantized models in safetensors format is not supported, and one must use the pytorch tensor format. In the near future, serializing in safetensors will also be possible thanks to the efforts of [Jerry Zhang](https://github.com/jerryzh168) in [this PR](https://github.com/huggingface/safetensors/pull/516).
