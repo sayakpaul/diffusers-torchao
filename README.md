@@ -131,7 +131,30 @@ We know that the table included above is hard to parse. So, we wanted to include
 * Select the quantization technique that gives you the best trade-off between memory and latency. 
 * A quantization technique may exhibit different optimal settings for a given batch size. For example, for a batch size of 4, `int8dq` gives best time without any QKV fusion. But for other batch sizes, that is not the case.
 
-Note that we can additionally compile the VAE too and it should work with most of the quantization schemes: `pipeline.vae.decode = torch.compile(pipeline.vae.decode, mode="max-autotune", fullgraph=True)`, but the sake of simplicity, we decided to not include it.
+### Semi-structured sparsity + dynamic int8 quant
+
+In our [`inference/benchmark_image.py`](./inference/benchmark_image.py) script, there's an option to enable semi-structured sparsity with dynamic int8 quantization which is particularly suitable for larger batch sizes. You can enable it through the `--sparsify` flag. But we found that it significantly degrades image quality at the time of this writing.
+
+Things to note:
+
+* Only CUDA 12.4 and H100 and A100 devices support this option. You can use this Docker container: `spsayakpaul/torchao-exps:latest`. It has CUDA 12.4, torch nightlies, and other libraries installed to run the sparsity benchmark.
+* Running with semi-structured sparsity and int8 dynamic quantization allows a batch size of 16.
+
+The table below provides some benchmarks: 
+
+<details>
+<summary>Sparsity Benchmarks</summary>
+|    | ckpt_id                      |   batch_size | fuse   | compile   | compile_vae   | sparsify   |   time |
+|---:|:-----------------------------|-------------:|:-------|:----------|:--------------|:-----------|-------:|
+|  0 | black-forest-labs/FLUX.1-dev |           16 | True   | True      | True          | True       | 50.62  |
+|  1 | black-forest-labs/FLUX.1-dev |           16 | False  | True      | True          | True       | 51.167 |
+|  2 | black-forest-labs/FLUX.1-dev |           16 | True   | True      | False         | True       | 51.418 |
+|  3 | black-forest-labs/FLUX.1-dev |           16 | False  | True      | False         | True       | 51.941 |
+
+</details>
+
+> [!NOTE]
+> We can additionally compile the VAE too and it should work with most of the quantization schemes: `pipeline.vae.decode = torch.compile(pipeline.vae.decode, mode="max-autotune", fullgraph=True)`, but the sake of simplicity, we decided to not include it.
 
 ## CogVideoX Benchmarks
 
