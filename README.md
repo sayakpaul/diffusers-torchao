@@ -144,6 +144,7 @@ The table below provides some benchmarks:
 
 <details>
 <summary>Sparsity Benchmarks</summary>
+    
 |    | ckpt_id                      |   batch_size | fuse   | compile   | compile_vae   | sparsify   |   time |
 |---:|:-----------------------------|-------------:|:-------|:----------|:--------------|:-----------|-------:|
 |  0 | black-forest-labs/FLUX.1-dev |           16 | True   | True      | True          | True       | 50.62  |
