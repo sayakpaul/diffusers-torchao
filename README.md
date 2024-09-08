@@ -124,7 +124,7 @@ We benchmark two models ([Flux.1-Dev](https://huggingface.co/black-forest-labs/F
 
 </details>
 
-With the newly added `fp8dqrow` scheme, we can bring down the inference latency to **2.966 seconds** for Flux.1 Dev (batch size:1 , steps: 28, resolution: 1024) on an H100. Additional results:
+With the newly added `fp8dqrow` scheme, we can bring down the inference latency to **2.966 seconds** for Flux.1 Dev (batch size:1 , steps: 28, resolution: 1024) on an H100.  `fp8dqrow` has more scales per tensors and less quantization error. Additional results:
 
 <details>
 <summary>Additional `fp8dqrow` results</summary>
