@@ -6,16 +6,7 @@ torch.set_float32_matmul_precision("high")
 
 from diffusers import DiffusionPipeline
 
-from torchao.quantization import (
-    int4_weight_only,
-    int8_weight_only,
-    int8_dynamic_activation_int8_weight,
-    float8_dynamic_activation_float8_weight,
-    float8_weight_only,
-    quantize_,
-    autoquant,
-)
-from torchao.sparsity import sparsify_, int8_dynamic_activation_int8_semi_sparse_weight
+from torchao.quantization import quantize_, autoquant
 import argparse
 import json
 
@@ -55,14 +46,20 @@ def load_pipeline(
 
     if not sparsify:
         if quantization == "int8dq":
+            from torchao.quantization import int8_dynamic_activation_int8_weight
+
             quantize_(pipeline.transformer, int8_dynamic_activation_int8_weight())
             if compile_vae:
                 quantize_(pipeline.vae, int8_dynamic_activation_int8_weight())
         elif quantization == "int8wo":
+            from torchao.quantization import int8_weight_only
+
             quantize_(pipeline.transformer, int8_weight_only())
             if compile_vae:
                 quantize_(pipeline.vae, int8_weight_only())
         elif quantization == "int4wo":
+            from torchao.quantization import int4_weight_only
+
             quantize_(pipeline.transformer, int4_weight_only())
             if compile_vae:
                 quantize_(pipeline.vae, int4_weight_only())
@@ -73,10 +70,14 @@ def load_pipeline(
             if compile_vae:
                 quantize_(pipeline.vae, fp6_llm_weight_only())
         elif quantization == "fp8wo":
+            from torchao.quantization import float8_weight_only
+
             quantize_(pipeline.transformer, float8_weight_only())
             if compile_vae:
                 quantize_(pipeline.vae, float8_weight_only())
         elif quantization == "fp8dq":
+            from torchao.quantization import float8_dynamic_activation_float8_weight
+
             quantize_(pipeline.transformer, float8_dynamic_activation_float8_weight())
             if compile_vae:
                 quantize_(pipeline.vae, float8_dynamic_activation_float8_weight())
@@ -92,6 +93,8 @@ def load_pipeline(
                 pipeline.vae = autoquant(pipeline.vae, error_on_unseen=False)
 
     if sparsify:
+        from torchao.sparsity import sparsify_, int8_dynamic_activation_int8_semi_sparse_weight
+
         sparsify_(pipeline.transformer, int8_dynamic_activation_int8_semi_sparse_weight())
         if compile_vae:
             sparsify_(pipeline.vae, int8_dynamic_activation_int8_semi_sparse_weight())
