@@ -68,6 +68,7 @@ def load_pipeline(
                 quantize_(pipeline.vae, int4_weight_only())
         elif quantization == "fp6":
             from torchao.prototype.quant_llm import fp6_llm_weight_only
+
             quantize_(pipeline.transformer, fp6_llm_weight_only())
             if compile_vae:
                 quantize_(pipeline.vae, fp6_llm_weight_only())
@@ -79,6 +80,12 @@ def load_pipeline(
             quantize_(pipeline.transformer, float8_dynamic_activation_float8_weight())
             if compile_vae:
                 quantize_(pipeline.vae, float8_dynamic_activation_float8_weight())
+        elif quantization == "fp8dqrow":
+            from torchao.quantization.quant_api import PerRow
+
+            quantize_(pipeline.transformer, float8_dynamic_activation_float8_weight(granularity=PerRow()))
+            if compile_vae:
+                quantize_(pipeline.vae, float8_dynamic_activation_float8_weight(granularity=PerRow()))
         elif quantization == "autoquant":
             pipeline.transformer = autoquant(pipeline.transformer, error_on_unseen=False)
             if compile_vae:
@@ -168,7 +175,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--quantization",
         default="None",
-        choices=["int8dq", "int8wo", "int4wo", "autoquant", "fp6", "fp8wo", "fp8dq", "None"],
+        choices=["int8dq", "int8wo", "int4wo", "autoquant", "fp6", "fp8wo", "fp8dq", "fp8dqrow", "None"],
         help="Which quantization technique to apply",
     )
     parser.add_argument("--sparsify", action="store_true")
