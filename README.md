@@ -124,6 +124,24 @@ We benchmark two models ([Flux.1-Dev](https://huggingface.co/black-forest-labs/F
 
 </details>
 
+With the newly added `fp8dqrow` scheme, we can bring down the inference latency to **2.966 seconds** for Flux.1 Dev (batch size:1 , steps: 28, resolution: 1024) on an H100. Additional results:
+
+<details>
+<summary>Additional `fp8dqrow` results</summary>
+
+|    | ckpt_id                      |   batch_size | fuse   | compile   | compile_vae   | quantization   | sparsify   |   model_memory |   inference_memory |   time |
+|---:|:-----------------------------|-------------:|:-------|:----------|:--------------|:---------------|:-----------|---------------:|-------------------:|-------:|
+|  0 | black-forest-labs/FLUX.1-dev |            4 | True   | True      | True          | fp8dqrow       | False      |         22.377 |             35.83  | 11.441 |
+|  1 | black-forest-labs/FLUX.1-dev |            1 | False  | True      | True          | fp8dqrow       | False      |         20.368 |             31.818 |  2.981 |
+|  2 | black-forest-labs/FLUX.1-dev |            4 | True   | True      | False         | fp8dqrow       | False      |         22.378 |             35.829 | 11.682 |
+|  3 | black-forest-labs/FLUX.1-dev |            1 | False  | True      | False         | fp8dqrow       | False      |         20.37  |             31.82  |  3.039 |
+|  4 | black-forest-labs/FLUX.1-dev |            4 | False  | True      | False         | fp8dqrow       | False      |         20.369 |             31.818 | 11.692 |
+|  5 | black-forest-labs/FLUX.1-dev |            4 | False  | True      | True          | fp8dqrow       | False      |         20.367 |             31.817 | 11.421 |
+|  6 | black-forest-labs/FLUX.1-dev |            1 | True   | True      | True          | fp8dqrow       | False      |         22.379 |             35.831 |  2.966 |
+|  7 | black-forest-labs/FLUX.1-dev |            1 | True   | True      | False         | fp8dqrow       | False      |         22.376 |             35.827 |  3.03  |
+
+</details>
+
 ### Trade-offs, trade-offs, and more trade-offs
 
 We know that the table included above is hard to parse. So, we wanted to include a couple of points that are worth noting. 
