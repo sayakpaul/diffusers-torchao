@@ -2,7 +2,7 @@
 
 **Optimize image and video generation with [`diffusers`](https://github.com/huggingface/diffusers), [`torchao`](https://github.com/pytorch/ao), combining `torch.compile()` 🔥** 
 
-We provide end-to-end inference and experimental training recipes to use `torchao` with `diffusers` in this repo. We demonstrate **48.86%** speedup on [Flux.1-Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev)<sup>*</sup> and **21%** speedup on [CogVideoX-5b](https://huggingface.co/THUDM/CogVideoX-5b) when comparing *compiled* quantized models against their standard bf16 counterparts<sup>**</sup>. 
+We provide end-to-end inference and experimental training recipes to use `torchao` with `diffusers` in this repo. We demonstrate **53.88%** speedup on [Flux.1-Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev)<sup>*</sup> and **21%** speedup on [CogVideoX-5b](https://huggingface.co/THUDM/CogVideoX-5b) when comparing *compiled* quantized models against their standard bf16 counterparts<sup>**</sup>. 
 
 <sub><sup>*</sup>The experiments were run on a single H100, 80 GB GPU.</sub>
 <sub><sup>**</sup>The experiments were run on a single A100, 80 GB GPU.</sub>
@@ -121,6 +121,24 @@ We benchmark two models ([Flux.1-Dev](https://huggingface.co/black-forest-labs/F
 | black-forest-labs/FLUX.1-dev |            8 | False  | False     | False         | int8wo         | False      |         20.386 |             36.457 |  57.026 |
 | black-forest-labs/FLUX.1-dev |            8 | True   | True      | False         | int8wo         | False      |         22.397 |             38.464 |  31.216 |
 | black-forest-labs/FLUX.1-dev |            4 | True   | False     | False         | fp8wo          | False      |         22.368 |             35.616 |  26.716 |
+
+</details>
+
+With the newly added `fp8dqrow` scheme, we can bring down the inference latency to **2.966 seconds** for Flux.1 Dev (batch size:1 , steps: 28, resolution: 1024) on an H100.  `fp8dqrow` has more scales per tensors and less quantization error. Additional results:
+
+<details>
+<summary>Additional `fp8dqrow` results</summary>
+
+|    | ckpt_id                      |   batch_size | fuse   | compile   | compile_vae   | quantization   | sparsify   |   model_memory |   inference_memory |   time |
+|---:|:-----------------------------|-------------:|:-------|:----------|:--------------|:---------------|:-----------|---------------:|-------------------:|-------:|
+|  0 | black-forest-labs/FLUX.1-dev |            4 | True   | True      | True          | fp8dqrow       | False      |         22.377 |             35.83  | 11.441 |
+|  1 | black-forest-labs/FLUX.1-dev |            1 | False  | True      | True          | fp8dqrow       | False      |         20.368 |             31.818 |  2.981 |
+|  2 | black-forest-labs/FLUX.1-dev |            4 | True   | True      | False         | fp8dqrow       | False      |         22.378 |             35.829 | 11.682 |
+|  3 | black-forest-labs/FLUX.1-dev |            1 | False  | True      | False         | fp8dqrow       | False      |         20.37  |             31.82  |  3.039 |
+|  4 | black-forest-labs/FLUX.1-dev |            4 | False  | True      | False         | fp8dqrow       | False      |         20.369 |             31.818 | 11.692 |
+|  5 | black-forest-labs/FLUX.1-dev |            4 | False  | True      | True          | fp8dqrow       | False      |         20.367 |             31.817 | 11.421 |
+|  6 | black-forest-labs/FLUX.1-dev |            1 | True   | True      | True          | fp8dqrow       | False      |         22.379 |             35.831 |  2.966 |
+|  7 | black-forest-labs/FLUX.1-dev |            1 | True   | True      | False         | fp8dqrow       | False      |         22.376 |             35.827 |  3.03  |
 
 </details>
 
