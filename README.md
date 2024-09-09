@@ -277,6 +277,22 @@ The table below provides some benchmarks:
 
 Through visual inspection of various outputs, we identified that the best results were achieved with int8 weight-only quantization, int8 dynamic quantization, fp8 (currently supported only on Hopper architecture), and autoquant. While the outputs sometimes differed visually from their standard fp16/bf16 counterparts, they maintained the expected quality. Additionally, we observed that int4 dynamic quantization generally produced satisfactory results in most cases, but showed greater deviation in structure, color, composition and motion.
 
+With the newly added `fp8dqrow` scheme, the inference latency is **76.70 seconds** for CogVideoX-5b (batch size: 1 , steps: 50, frames, resolution: 720x480) on an H100. `fp8dqrow` has more scales per tensors and less quantization error. The quality, from visual inspection, is very close to fp16/bf16 and better than int8 in many cases.
+
+<details>
+<summary>Additional `fp8dqrow` benchmarks</summary>
+
+**H100**
+
+|  model_type  |  compile  |  fuse_qkv  |  quantize_vae  |  quantization  |   model_memory |   inference_memory |   time  |
+|:------------:|:---------:|:----------:|:--------------:|:--------------:|:--------------:|:------------------:|:-------:|
+|      5B      |   False   |   False    |     False      |    fp8dqrow    |          10.28 |             22.291 | 122.99  |
+|      5B      |   False   |    True    |     False      |    fp8dqrow    |         11.389 |             23.399 | 118.205 |
+|      5B      |   True    |   False    |     False      |    fp8dqrow    |         10.282 |             22.292 | 76.777  |
+|      5B      |   True    |    True    |     False      |    fp8dqrow    |         11.391 |               23.4 | 76.705  |
+
+</details>
+
 > [!NOTE]
 > From our testing and feedback from various folks that tried out torchao quantization after the release of CogVideoX, it was found that Ampere and above architectures had the best support for quantization dtypes. For other architectures such as Turing or Volta, quantizing the models did not help save memory or the inference errored out. It was particularly pointed out to be erroneous with the Apple `mps` backend. Support for other architectures will only get better with time.
 
