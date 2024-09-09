@@ -17,8 +17,8 @@ from torchao.quantization import (
     int4_weight_only,
     float8_dynamic_activation_float8_weight,
     float8_weight_only,
-    fpx_weight_only,
 )
+from torchao.prototype.quant_llm import fp6_llm_weight_only
 from torchao.quantization.quant_api import PerRow
 from torchao.sparsity import sparsify_
 
