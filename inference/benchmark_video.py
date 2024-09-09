@@ -156,7 +156,7 @@ def get_args():
         "--model_id",
         type=str,
         default="THUDM/CogVideoX-5b",
-        # choices=["THUDM/CogVideoX-2b", "THUDM/CogVideoX-5b"],
+        choices=["THUDM/CogVideoX-2b", "THUDM/CogVideoX-5b"],
         help="Hub model or path to local model for which the benchmark is to be run.",
     )
     parser.add_argument(
