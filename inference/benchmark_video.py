@@ -35,7 +35,7 @@ CONVERT_DTYPE = {
     "fp8wo": lambda module: quantize_(module, float8_weight_only()),
     "fp8dq": lambda module: quantize_(module, float8_dynamic_activation_float8_weight()),
     "fp8dqrow": lambda module: quantize_(module, float8_dynamic_activation_float8_weight(granularity=PerRow())),
-    "fp6": lambda module: quantize_(module, fpx_weight_only(3, 2)),
+    "fp6": lambda module: quantize_(module, fp6_llm_weight_only()),
     "int8wo": lambda module: quantize_(module, int8_weight_only()),
     "int8dq": lambda module: quantize_(module, int8_dynamic_activation_int8_weight()),
     "int4dq": lambda module: quantize_(module, int8_dynamic_activation_int4_weight()),
