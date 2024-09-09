@@ -26,13 +26,15 @@ image = pipeline(
 Throw in `torch.compile()` to make it go brrr:
 
 ```diff
+# If you are using "autoquant" then you should compile first and then
+# apply autoquant.
 + pipeline.transformer.to(memory_format=torch.channels_last)
 + pipeline.transformer = torch.compile(
 +    pipeline.transformer, mode="max-autotune", fullgraph=True
 +)
 ```
 
-This, alone, is sufficient to cut down inference time for Flux.1-Dev from 6.431 seconds to 3.483 seconds on an H100. Check out the [`inference`](./inference/) directory for the code.
+This, alone, is sufficient to cut down inference time for Flux.1-Dev from 6.431 seconds to 3.483 seconds on an H100. Check out the [`inference`](./inference/) directory for the code. 
 
 > [!NOTE]
 > Quantizing to a supported datatype and using base precision as fp16 can lead to overflows. The recommended base precision for CogVideoX-2b is fp16 while that of CogVideoX-5b is bf16. If comparisons were to be made in fp16, the speedup gains would be **~23%** and **~32%** respectively.
