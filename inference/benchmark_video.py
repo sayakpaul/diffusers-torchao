@@ -17,8 +17,8 @@ from torchao.quantization import (
     int4_weight_only,
     float8_dynamic_activation_float8_weight,
     float8_weight_only,
+    fpx_weight_only,
 )
-from torchao.prototype.quant_llm import fp6_llm_weight_only
 from torchao.quantization.quant_api import PerRow
 from torchao.sparsity import sparsify_
 
@@ -35,7 +35,9 @@ CONVERT_DTYPE = {
     "fp8wo": lambda module: quantize_(module, float8_weight_only()),
     "fp8dq": lambda module: quantize_(module, float8_dynamic_activation_float8_weight()),
     "fp8dqrow": lambda module: quantize_(module, float8_dynamic_activation_float8_weight(granularity=PerRow())),
-    "fp6": lambda module: quantize_(module, fp6_llm_weight_only()),
+    "fp6_e3m2": lambda module: quantize_(module, fpx_weight_only(3, 2)),
+    "fp5_e2m2": lambda module: quantize_(module, fpx_weight_only(2, 2)),
+    "fp4_e2m1": lambda module: quantize_(module, fpx_weight_only(2, 1)),
     "int8wo": lambda module: quantize_(module, int8_weight_only()),
     "int8dq": lambda module: quantize_(module, int8_dynamic_activation_int8_weight()),
     "int4dq": lambda module: quantize_(module, int8_dynamic_activation_int4_weight()),
@@ -156,7 +158,7 @@ def get_args():
         "--model_id",
         type=str,
         default="THUDM/CogVideoX-5b",
-        choices=["THUDM/CogVideoX-2b", "THUDM/CogVideoX-5b"],
+        # choices=["THUDM/CogVideoX-2b", "THUDM/CogVideoX-5b"],
         help="Hub model or path to local model for which the benchmark is to be run.",
     )
     parser.add_argument(
@@ -169,7 +171,9 @@ def get_args():
             "fp8wo",
             "fp8dq",
             "fp8dqrow",
-            "fp6",
+            "fp6_e3m2",
+            "fp5_e2m2",
+            "fp4_e2m1",
             "int8wo",
             "int8dq",
             "int4dq",
