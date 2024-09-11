@@ -281,7 +281,7 @@ Through visual inspection of various outputs, we identified that the best result
 
 With the newly added `fp8dqrow` scheme, the inference latency is **76.70 seconds** for CogVideoX-5b (batch size: 1 , steps: 50, frames: 49, resolution: 720x480) on an H100. `fp8dqrow` has more scales per tensors and less quantization error. The quality, from visual inspection, is very close to fp16/bf16 and better than int8 in many cases.
 
-TorchAO also supports arbitary exponent and mantissa bits for floating point types, which provides experimental freedom to find the best settings for your models. Here, we also share results with `fp6_e3m2`, `fp5_e2m2` and `fp4_e2m1` that do well in preserving quality.
+TorchAO also supports arbitary exponent and mantissa bits for floating point types, which provides experimental freedom to find the best settings for your models. Here, we also share results with `fp6_e3m2`, `fp5_e2m2` and `fp4_e2m1`. We find that fp6 and fp5 quantizations can preserve good generation quality and match the expectation from fp16 precision most of the time. Note that running compiled inference with these types fails at the moment.
 
 <details>
 <summary>Additional `fp8dqrow`, `fp6_e3m2`, `fp5_e2m2` and `fp4_e2m1` benchmarks</summary>
