@@ -473,7 +473,7 @@ In this section, we provide a non-exhaustive overview of the things we learned d
 
 * *Small matmuls.* If the matmuls of the underlying are small enough or the performance without quantization isn't bottlenecked by weight load time, these techniques may reduce performance.
 
-* *Cache compilation results.* `torch.compile()` can take long just like any other deep-learning compiler. So, it is always recommended to cache the compilation results. Refer to [the official guide](https://pytorch.org/tutorials/recipes/torch_compile_caching_tutorial.html) to know more. 
+* *Cache compilation results.* `torch.compile()` can take long just like any other deep-learning compiler. So, it is always recommended to cache the compilation results. Refer to [the official guide](https://pytorch.org/tutorials/recipes/torch_compile_caching_tutorial.html) to know more. Additionally, we can configure the [`ENABLE_AOT_AUTOGRAD_CACHE` flag](https://github.com/pytorch/pytorch/blob/dddaadac6c5f9787ad0918e72f57a397d352276e/torch/_functorch/config.py#L46) for faster compilation times. 
 
 ## Benefitting from `torch.compile()`
 
