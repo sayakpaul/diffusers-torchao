@@ -300,11 +300,16 @@ TorchAO also supports arbitary exponent and mantissa bits for floating point typ
 |  model_type  |  compile  |  fuse_qkv  |  quantize_vae  |  quantization  |   model_memory |   inference_memory |   time  |
 |:------------:|:---------:|:----------:|:--------------:|:--------------:|:--------------:|:------------------:|:-------:|
 |      5B      |   False   |   False    |     False      |    fp6_e3m2    |          7.798 |             21.028 | 287.842 |
+|      5B      |   True    |   False    |     False      |    fp6_e3m2    |            7.8 |             21.028 | 208.499 |
 |      5B      |   False   |    True    |     False      |    fp6_e3m2    |           8.63 |             23.243 | 285.294 |
+|      5B      |   True    |    True    |     False      |    fp6_e3m2    |          8.631 |             23.243 | 208.513 |
 |      5B      |   False   |   False    |     False      |    fp5_e2m2    |          6.619 |              21.02 | 305.401 |
 |      5B      |   False   |    True    |     False      |    fp5_e2m2    |          7.312 |             23.237 | 304.725 |
+|      5B      |   True    |    True    |     False      |    fp5_e2m2    |          7.312 |             23.237 | 213.837 |
 |      5B      |   False   |   False    |     False      |    fp4_e2m1    |          5.423 |             21.012 | 282.835 |
+|      5B      |   True    |   False    |     False      |    fp4_e2m1    |          5.422 |             21.013 | 207.719 |
 |      5B      |   False   |    True    |     False      |    fp4_e2m1    |          5.978 |             23.228 | 280.262 |
+|      5B      |   True    |    True    |     False      |    fp4_e2m1    |          5.977 |             23.227 | 207.520 |
 
 </details>
 
