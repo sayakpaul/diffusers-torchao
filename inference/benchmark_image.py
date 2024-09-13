@@ -10,7 +10,7 @@ from torchao.quantization import quantize_, autoquant
 import argparse
 import json
 
-from utils import benchmark_fn, pretty_print_results, reset_memory, bytes_to_giga_bytes
+from utils import cleanup_tmp_directory, benchmark_fn, pretty_print_results, reset_memory, bytes_to_giga_bytes
 
 
 PROMPT = "Eiffel Tower was Made up of more than 2 million translucent straws to look like a cloud, with the bell tower at the top of the building, Michel installed huge foam-making machines in the forest to blow huge amounts of unpredictable wet clouds in the building's classic architecture."
@@ -230,3 +230,4 @@ if __name__ == "__main__":
 
     info = run_benchmark(pipeline, args)
     serialize_artifacts(info, pipeline, args)
+    cleanup_tmp_directory()

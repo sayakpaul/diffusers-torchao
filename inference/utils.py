@@ -1,6 +1,9 @@
 import gc
 
 import torch
+import os
+import pwd
+import shutil
 import torch.utils.benchmark as benchmark
 from tabulate import tabulate
 
@@ -42,3 +45,36 @@ def pretty_print_results(results, precision: int = 6):
 
     filtered_table = {k: format_value(v) for k, v in results.items()}
     print(tabulate([filtered_table], headers="keys", tablefmt="pipe", stralign="center"))
+
+
+def get_current_user():
+    """Get the current user's username."""
+    return pwd.getpwuid(os.getuid()).pw_name
+
+
+def is_file_owned_by_current_user(filepath):
+    """Check if a file is owned by the current user."""
+    file_stat = os.stat(filepath)
+    return file_stat.st_uid == os.getuid()
+
+
+def cleanup_tmp_directory():
+    """Remove files in /tmp owned by the current user."""
+    tmp_dir = "/tmp"
+    current_user = get_current_user()
+
+    for filename in os.listdir(tmp_dir):
+        filepath = os.path.join(tmp_dir, filename)
+
+        try:
+            if is_file_owned_by_current_user(filepath):
+                if os.path.isfile(filepath):
+                    os.remove(filepath)
+                    print(f"Removed file: {filepath}")
+                elif os.path.isdir(filepath):
+                    shutil.rmtree(filepath)
+                    print(f"Removed directory: {filepath}")
+            else:
+                print(f"Skipping {filepath}, not owned by {current_user}")
+        except Exception as e:
+            print(f"Error processing {filepath}: {e}")

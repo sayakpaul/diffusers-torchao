@@ -22,7 +22,7 @@ from torchao.quantization import (
 from torchao.quantization.quant_api import PerRow
 from torchao.sparsity import sparsify_
 
-from utils import benchmark_fn, pretty_print_results, print_memory, reset_memory
+from utils import cleanup_tmp_directory, benchmark_fn, pretty_print_results, print_memory, reset_memory
 
 # Set high precision for float32 matrix multiplications.
 # This setting optimizes performance on NVIDIA GPUs with Ampere architecture (e.g., A100, RTX 30 series) or newer.
@@ -209,3 +209,4 @@ if __name__ == "__main__":
     args = get_args()
 
     main(args.model_id, args.dtype, args.device, args.quantize_vae, args.compile, args.fuse_qkv)
+    cleanup_tmp_directory()
