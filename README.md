@@ -281,7 +281,7 @@ Through visual inspection of various outputs, we identified that the best result
 
 With the newly added `fp8dqrow` scheme, the inference latency is **76.70 seconds** for CogVideoX-5b (batch size: 1 , steps: 50, frames: 49, resolution: 720x480) on an H100. `fp8dqrow` has more scales per tensors and less quantization error. The quality, from visual inspection, is very close to fp16/bf16 and better than int8 in many cases.
 
-TorchAO also supports arbitary exponent and mantissa bits for floating point types, which provides experimental freedom to find the best settings for your models. Here, we also share results with `fp6_e3m2`, `fp5_e2m2` and `fp4_e2m1`. We find that fp6 and fp5 quantizations can preserve good generation quality and match the expectation from fp16 precision most of the time. Note that running compiled inference with these types fails at the moment.
+TorchAO also supports arbitary exponent and mantissa bits for floating point types, which provides experimental freedom to find the best settings for your models. Here, we also share results with `fp6_e3m2`, `fp5_e2m2` and `fp4_e2m1`. We find that fp6 and fp5 quantizations can preserve good generation quality and match the expectation from fp16 precision most of the time. To achieve a balance between speed and quality, the recommended quantization dtypes for lower VRAM GPUs are `int8dq`, `fp8dqrow`, `fp6_e3m2` and autoquant which, when compiled, are faster or close in performance to their bf16 counterparts.
 
 <details>
 <summary>Additional `fp8dqrow`, `fp6_e3m2`, `fp5_e2m2` and `fp4_e2m1` benchmarks</summary>
@@ -300,11 +300,17 @@ TorchAO also supports arbitary exponent and mantissa bits for floating point typ
 |  model_type  |  compile  |  fuse_qkv  |  quantize_vae  |  quantization  |   model_memory |   inference_memory |   time  |
 |:------------:|:---------:|:----------:|:--------------:|:--------------:|:--------------:|:------------------:|:-------:|
 |      5B      |   False   |   False    |     False      |    fp6_e3m2    |          7.798 |             21.028 | 287.842 |
+|      5B      |   True    |   False    |     False      |    fp6_e3m2    |            7.8 |             21.028 | 208.499 |
 |      5B      |   False   |    True    |     False      |    fp6_e3m2    |           8.63 |             23.243 | 285.294 |
+|      5B      |   True    |    True    |     False      |    fp6_e3m2    |          8.631 |             23.243 | 208.513 |
 |      5B      |   False   |   False    |     False      |    fp5_e2m2    |          6.619 |              21.02 | 305.401 |
+|      5B      |   True    |   False    |     False      |    fp5_e2m2    |          6.622 |             21.021 | 217.707 |
 |      5B      |   False   |    True    |     False      |    fp5_e2m2    |          7.312 |             23.237 | 304.725 |
+|      5B      |   True    |    True    |     False      |    fp5_e2m2    |          7.312 |             23.237 | 213.837 |
 |      5B      |   False   |   False    |     False      |    fp4_e2m1    |          5.423 |             21.012 | 282.835 |
+|      5B      |   True    |   False    |     False      |    fp4_e2m1    |          5.422 |             21.013 | 207.719 |
 |      5B      |   False   |    True    |     False      |    fp4_e2m1    |          5.978 |             23.228 | 280.262 |
+|      5B      |   True    |    True    |     False      |    fp4_e2m1    |          5.977 |             23.227 | 207.520 |
 
 </details>
 
