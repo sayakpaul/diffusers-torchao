@@ -144,12 +144,56 @@ With the newly added `fp8dqrow` scheme, we can bring down the inference latency 
 
 </details>
 
+
 ### Trade-offs, trade-offs, and more trade-offs
 
 We know that the table included above is hard to parse. So, we wanted to include a couple of points that are worth noting. 
 
 * Select the quantization technique that gives you the best trade-off between memory and latency. 
 * A quantization technique may exhibit different optimal settings for a given batch size. For example, for a batch size of 4, `int8dq` gives best time without any QKV fusion. But for other batch sizes, that is not the case.
+
+The section below, drives this point home.
+
+#### Higher batch sizes like 16 and above
+
+This is how the top-5 latency looks like: 
+
+<details>
+<summary>Collapse table</summary>
+
+|    | ckpt_id                      |   batch_size | fuse   | compile   | compile_vae   | quantization   | sparsify   |   model_memory |   inference_memory |   time |
+|---:|:-----------------------------|-------------:|:-------|:----------|:--------------|:---------------|:-----------|---------------:|-------------------:|-------:|
+|  0 | black-forest-labs/FLUX.1-dev |           16 | False  | True      | True          | fp8dq          | False      |         20.356 |             52.704 | 45.004 |
+|  1 | black-forest-labs/FLUX.1-dev |           16 | False  | True      | True          | fp8dqrow       | False      |         20.368 |             52.715 | 45.521 |
+|  2 | black-forest-labs/FLUX.1-dev |           16 | True   | True      | False         | fp8dq          | False      |         22.363 |             52.464 | 45.614 |
+|  3 | black-forest-labs/FLUX.1-dev |           16 | False  | True      | False         | fp8dq          | False      |         20.356 |             50.458 | 45.865 |
+|  4 | black-forest-labs/FLUX.1-dev |           16 | False  | True      | False         | fp8dqrow       | False      |         20.367 |             50.469 | 46.392 |
+
+</details>
+
+But interestingly, if we use an exotic fpx scheme for quantization, we can afford lesser memory with an increase in the latency:
+
+<details>
+<summary>Collapse table</summary>
+
+|    | ckpt_id                      |   batch_size | fuse   | compile   | compile_vae   | quantization   | sparsify   |   model_memory |   inference_memory |   time |
+|---:|:-----------------------------|-------------:|:-------|:----------|:--------------|:---------------|:-----------|---------------:|-------------------:|-------:|
+|  0 | black-forest-labs/FLUX.1-dev |           16 | False  | True      | True          | fp6_e3m2       | False      |         17.591 |             49.938 | 61.649 |
+|  1 | black-forest-labs/FLUX.1-dev |           16 | False  | True      | True          | fp4_e2m1       | False      |         14.823 |             47.173 | 61.75  |
+|  2 | black-forest-labs/FLUX.1-dev |           16 | True   | True      | False         | fp6_e3m2       | False      |         19.104 |             49.206 | 62.244 |
+|  3 | black-forest-labs/FLUX.1-dev |           16 | True   | True      | False         | fp4_e2m1       | False      |         15.827 |             45.929 | 62.296 |
+|  4 | black-forest-labs/FLUX.1-dev |           16 | False  | True      | False         | fp6_e3m2       | False      |         17.598 |             47.7   | 62.551 |
+
+</details>
+
+As a reference, with just `torch.bfloat16` and SDPA, for a batch size of 16, we get:
+
+|    | ckpt_id                      |   batch_size | fuse   | compile   | compile_vae   | quantization   | sparsify   |   model_memory |   inference_memory |   time |
+|---:|:-----------------------------|-------------:|:-------|:----------|:--------------|:---------------|:-----------|---------------:|-------------------:|-------:|
+|  0 | black-forest-labs/FLUX.1-dev |           16 | False  | False     | False         | None           | False      |         31.438 |             61.548 | 97.545 |
+
+> [!WARNING]  
+> Using `fp4_e2m1` on the VAE negatively affects the image quality significantly.
 
 ### Semi-structured sparsity + dynamic int8 quant
 
