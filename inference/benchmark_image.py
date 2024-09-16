@@ -96,6 +96,7 @@ def load_pipeline(
             if compile_vae:
                 quantize_(pipeline.vae, float8_dynamic_activation_float8_weight())
         elif quantization == "fp8dqrow":
+            from torchao.quantization import float8_dynamic_activation_float8_weight
             from torchao.quantization.quant_api import PerRow
 
             quantize_(pipeline.transformer, float8_dynamic_activation_float8_weight(granularity=PerRow()))
@@ -212,7 +213,7 @@ if __name__ == "__main__":
         "--batch_size",
         default=1,
         type=int,
-        choices=[1, 4, 8],
+        choices=[1, 4, 8, 16],
         help="Number of images to generate for the testing prompt.",
     )
     args = parser.parse_args()
