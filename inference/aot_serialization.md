@@ -226,6 +226,9 @@ index bb214885d..78d04d51a 100644
 
 ```
 
+> [!NOTE]  
+> The changes may vary from pipeline to pipeline but the gist is that you'd want to modify a given pipeline so that it can operate with AoT-compiled version of an underlying model.
+
 ## Known limitations
 
 1. Doesn’t work with `load_lora_weights()`. You must fuse the LoRA weights and unload them before performing AoT compilation. 
