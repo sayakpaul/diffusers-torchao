@@ -7,6 +7,11 @@ We provide end-to-end inference and experimental training recipes to use `torcha
 <sub><sup>*</sup>The experiments were run on a single H100, 80 GB GPU.</sub>
 <sub><sup>**</sup>The experiments were run on a single A100, 80 GB GPU. For a single H100, the speedup is **33.04%**</sub>
 
+### Updates
+
+* `torchao` will soon be added as a quantization backend in `diffusers`, making it even easier to use with `diffusers`. 
+* Check out our new AoT compilation and serialization [guide](inference/aot_serialization.md) to reduce framework overheads.
+
 No-frills code:
 
 ```diff
