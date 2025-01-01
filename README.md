@@ -9,6 +9,7 @@ We provide end-to-end inference and experimental training recipes to use `torcha
 
 ### Updates
 
+* `torchao` is now officially supported as a quantization backend in `diffusers`. Check out the [docs](https://huggingface.co/docs/diffusers/main/en/quantization/torchao) for more details. 
 * `torchao` is being integrated into `diffusers` as an official quantization backend. Be on the lookout for [this PR](https://github.com/huggingface/diffusers/pull/10009) to get merged. 
 * `torchao` will soon be added as a quantization backend in `diffusers`, making it even easier to use with `diffusers`. 
 * Check out our new AoT compilation and serialization [guide](inference/aot_serialization.md) to reduce framework overheads.
