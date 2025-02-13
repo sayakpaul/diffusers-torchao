@@ -110,6 +110,7 @@ def load_pipeline(
     if sparsify:
         from torchao.sparsity import sparsify_
         from torchao.dtypes import SemiSparseLayout
+        from torchao.quantization import int8_dynamic_activation_int8_weight
 
         sparsify_(pipeline.transformer, int8_dynamic_activation_int8_weight(layout=SemiSparseLayout()))
         if compile_vae:
