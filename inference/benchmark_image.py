@@ -108,11 +108,13 @@ def load_pipeline(
                 pipeline.vae = autoquant(pipeline.vae, error_on_unseen=False)
 
     if sparsify:
-        from torchao.sparsity import sparsify_, int8_dynamic_activation_int8_semi_sparse_weight
+        from torchao.sparsity import sparsify_
+        from torchao.dtypes import SemiSparseLayout
+        from torchao.quantization import int8_dynamic_activation_int8_weight
 
-        sparsify_(pipeline.transformer, int8_dynamic_activation_int8_semi_sparse_weight())
+        sparsify_(pipeline.transformer, int8_dynamic_activation_int8_weight(layout=SemiSparseLayout()))
         if compile_vae:
-            sparsify_(pipeline.vae, int8_dynamic_activation_int8_semi_sparse_weight())
+            sparsify_(pipeline.vae, int8_dynamic_activation_int8_weight(layout=SemiSparseLayout()))
 
     if quantization != "autoquant" and compile:
         pipeline.transformer.to(memory_format=torch.channels_last)

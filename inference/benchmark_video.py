@@ -13,7 +13,6 @@ from torchao.quantization import (
     int8_weight_only,
     int8_dynamic_activation_int8_weight,
     int8_dynamic_activation_int4_weight,
-    int8_dynamic_activation_int8_semi_sparse_weight,
     int4_weight_only,
     float8_dynamic_activation_float8_weight,
     float8_weight_only,
@@ -21,6 +20,8 @@ from torchao.quantization import (
 )
 from torchao.quantization.quant_api import PerRow
 from torchao.sparsity import sparsify_
+from torchao.dtypes import SemiSparseLayout
+
 
 from utils import cleanup_tmp_directory, benchmark_fn, pretty_print_results, print_memory, reset_memory
 
@@ -43,7 +44,7 @@ CONVERT_DTYPE = {
     "int4dq": lambda module: quantize_(module, int8_dynamic_activation_int4_weight()),
     "int4wo": lambda module: quantize_(module, int4_weight_only()),
     "autoquant": lambda module: autoquant(module, error_on_unseen=False),
-    "sparsify": lambda module: sparsify_(module, int8_dynamic_activation_int8_semi_sparse_weight()),
+    "sparsify": lambda module: sparsify_(module, int8_dynamic_activation_int8_weight(layout=SemiSparseLayout())),
 }
 
 
