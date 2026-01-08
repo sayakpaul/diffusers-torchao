@@ -11,6 +11,8 @@ import argparse
 import json
 
 from utils import cleanup_tmp_directory, benchmark_fn, pretty_print_results, reset_memory, bytes_to_giga_bytes
+from packaging import version
+import importlib
 
 
 PROMPT = "Eiffel Tower was Made up of more than 2 million translucent straws to look like a cloud, with the bell tower at the top of the building, Michel installed huge foam-making machines in the forest to blow huge amounts of unpredictable wet clouds in the building's classic architecture."
@@ -20,6 +22,7 @@ PREFIXES = {
     "fal/AuraFlow": "auraflow",
     "black-forest-labs/FLUX.1-dev": "flux-dev",
 }
+TORCHAO_VERSION = version.parse(importlib.metadata.version("torchao"))
 
 
 def load_pipeline(
@@ -64,25 +67,38 @@ def load_pipeline(
             if compile_vae:
                 quantize_(pipeline.vae, int4_weight_only())
         elif quantization == "fp6_e3m2":
-            from torchao.quantization import fpx_weight_only
+            if TORCHAO_VERSION <= version.parse("0.14.1"):
+                from torchao.quantization import fpx_weight_only
 
-            quantize_(pipeline.transformer, fpx_weight_only(3, 2))
-            if compile_vae:
-                quantize_(pipeline.vae, fpx_weight_only(3, 2))
-
+                quantize_(pipeline.transformer, fpx_weight_only(3, 2))
+                if compile_vae:
+                    quantize_(pipeline.vae, fpx_weight_only(3, 2))
+            else:
+                raise ValueError(
+                    "Floating point X-bit quantization is not supported in torchao > 0.14.1"
+                )
         elif quantization == "fp5_e2m2":
-            from torchao.quantization import fpx_weight_only
+            if TORCHAO_VERSION <= version.parse("0.14.1"):
+                from torchao.quantization import fpx_weight_only
 
-            quantize_(pipeline.transformer, fpx_weight_only(2, 2))
-            if compile_vae:
-                quantize_(pipeline.vae, fpx_weight_only(2, 2))
-
+                quantize_(pipeline.transformer, fpx_weight_only(2, 2))
+                if compile_vae:
+                    quantize_(pipeline.vae, fpx_weight_only(2, 2))
+            else:
+                raise ValueError(
+                    "Floating point X-bit quantization is not supported in torchao > 0.14.1"
+                )
         elif quantization == "fp4_e2m1":
-            from torchao.quantization import fpx_weight_only
+            if TORCHAO_VERSION <= version.parse("0.14.1"):
+                from torchao.quantization import fpx_weight_only
 
-            quantize_(pipeline.transformer, fpx_weight_only(2, 1))
-            if compile_vae:
-                quantize_(pipeline.vae, fpx_weight_only(2, 1))
+                quantize_(pipeline.transformer, fpx_weight_only(2, 1))
+                if compile_vae:
+                    quantize_(pipeline.vae, fpx_weight_only(2, 1))
+            else:
+                raise ValueError(
+                    "Floating point X-bit quantization is not supported in torchao > 0.14.1"
+                )
         elif quantization == "fp8wo":
             from torchao.quantization import float8_weight_only
 

@@ -16,7 +16,6 @@ from torchao.quantization import (
     int4_weight_only,
     float8_dynamic_activation_float8_weight,
     float8_weight_only,
-    fpx_weight_only,
 )
 from torchao.quantization.quant_api import PerRow
 from torchao.sparsity import sparsify_
@@ -24,6 +23,12 @@ from torchao.dtypes import SemiSparseLayout
 
 
 from utils import cleanup_tmp_directory, benchmark_fn, pretty_print_results, print_memory, reset_memory
+from packaging import version
+import importlib
+
+TORCHAO_VERSION = version.parse(importlib.metadata.version("torchao"))
+if TORCHAO_VERSION <= version.parse("0.14.1"):
+    from torchao.quantization import fpx_weight_only
 
 # Set high precision for float32 matrix multiplications.
 # This setting optimizes performance on NVIDIA GPUs with Ampere architecture (e.g., A100, RTX 30 series) or newer.
@@ -36,9 +41,6 @@ CONVERT_DTYPE = {
     "fp8wo": lambda module: quantize_(module, float8_weight_only()),
     "fp8dq": lambda module: quantize_(module, float8_dynamic_activation_float8_weight()),
     "fp8dqrow": lambda module: quantize_(module, float8_dynamic_activation_float8_weight(granularity=PerRow())),
-    "fp6_e3m2": lambda module: quantize_(module, fpx_weight_only(3, 2)),
-    "fp5_e2m2": lambda module: quantize_(module, fpx_weight_only(2, 2)),
-    "fp4_e2m1": lambda module: quantize_(module, fpx_weight_only(2, 1)),
     "int8wo": lambda module: quantize_(module, int8_weight_only()),
     "int8dq": lambda module: quantize_(module, int8_dynamic_activation_int8_weight()),
     "int4dq": lambda module: quantize_(module, int8_dynamic_activation_int4_weight()),
@@ -46,6 +48,14 @@ CONVERT_DTYPE = {
     "autoquant": lambda module: autoquant(module, error_on_unseen=False),
     "sparsify": lambda module: sparsify_(module, int8_dynamic_activation_int8_weight(layout=SemiSparseLayout())),
 }
+if TORCHAO_VERSION <= version.parse("0.14.1"):
+    CONVERT_DTYPE.update(
+        {
+            "fp6_e3m2": lambda module: quantize_(module, fpx_weight_only(3, 2)),
+            "fp5_e2m2": lambda module: quantize_(module, fpx_weight_only(2, 2)),
+            "fp4_e2m1": lambda module: quantize_(module, fpx_weight_only(2, 1)),
+        }
+    )
 
 
 def load_pipeline(model_id, dtype, device, quantize_vae, compile, fuse_qkv):
@@ -107,6 +117,14 @@ def run_inference(pipe):
 
 
 def main(model_id, dtype, device, quantize_vae, compile, fuse_qkv):
+    if TORCHAO_VERSION > version.parse("0.14.1") and dtype in [
+        "fp6_e3m2",
+        "fp5_e2m2",
+        "fp4_e2m1",
+    ]:
+        raise ValueError(
+            "Floating point X-bit quantization is not supported in torchao > 0.14.1"
+        )
     reset_memory(device)
 
     # 1. Load pipeline
